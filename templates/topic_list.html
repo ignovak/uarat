@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  {{ forum.title_or_url }}
+{% endblock %}
+
+{% block content %}
+  
+<section>
+			<h1><a href="{{ siteroot }}" class="green">{{ forum.title_or_url }}</a></h1>
+			<p>{{ forum.tagline }}</p>
+  
+  <table>
+    <thead>
+      <tr>
+        <td>Thread</td>
+        <td>Messages</td>
+        <td>Views</td>
+        <td>Last author</td>
+      </tr>
+    </thead>
+<tbody>
+		{% if not topics %}
+			There are no topics. You better create one.
+		{% else %}
+		{% for topic in topics %}
+<tr>
+	<th class="contents">
+		<div class="topics">
+		    {% if topic.is_deleted %}
+				<a class="deleted" href="{{ siteroot }}topic?id={{ topic.key.id }}{% if topic.ncomments %}&comments={{ topic.ncomments }}{% endif %}" title="{{ topic.msg_short|striptags|escape }}">{{ topic.subject|escape }} </a>
+			{% else %}
+				<a href="{{ siteroot }}topic?id={{ topic.key.id }}{% if topic.ncomments %}&comments={{ topic.ncomments }}{% endif %}" title="{{ topic.msg_short|striptags|escape }}">{{ topic.subject|escape }} </a>
+			{% endif %}
+			{% if not forloop.first %}
+				<div class="dateline"></div>
+			{% endif %}
+		</div>
+  </th>
+  <td>{{ topic.ncomments }}</td>
+  <td></td>
+  <td>{{ topic.created_by|striptags|escape }}</td>
+</tr>
+		{% endfor %}
+		{% endif %}
+</tbody>
+  </table>
+		<div class="buttons">
+		<a accesskey="n" href="{{ siteroot }}post"><img src="/img/new.gif" alt="New topic" border="0" height="14" width="13"> <u>N</u>ew topic</a>
+		{% if new_from %}
+			<a accesskey="t" href="{{ siteroot }}?from={{ new_from}}"><img src="/img/archive.gif" alt="Older topics" border="0" height="14" width="13">Older <u>t</u>opics</a>
+		{% endif %}
+		</div>
+</section>
+<table>
+</table>
+
+		<form method="get" action="http://google.com/search">
+			<input type="hidden" name="IncludeBlogs" value="1">
+			<input type="hidden" name="as_sitesearch" value="{{ siteurl }}">
+			<div class="searchBox">
+				<table border="0" cellpadding="0" cellspacing="0">
+				<tbody>
+					<tr>
+						<td><label for="search">Search</label><br> </td>
+					</tr>
+					<tr>
+						<td><input name="q" id="search" value="" type="text"></td>
+						<td><input class="button" value="Go" type="submit">&nbsp;</td>
+					</tr>
+				</tbody>
+				</table>
+			</div>
+		</form>
+
+{% if analytics_code %}
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("{{ analytics_code }}");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+{% endif %}
+
+{% endblock %}

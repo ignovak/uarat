@@ -144,7 +144,7 @@ class Post(db.Model):
   # we'll user user_ip
   user_ip = db.IntegerProperty(required=True)
 
-  user = db.Reference(FofouUser, required=True)
+  user = db.Reference(User, required=True)
   # user_name, user_email and user_homepage might be different than
   # name/homepage/email fields in user object, since they can be changed in
   # FofouUser
@@ -215,10 +215,6 @@ def anonUser():
   if None == g_anonUser:
     g_anonUser = users.User("dummy@dummy.address.com")
   return g_anonUser
-
-def fake_error(response):
-  response.headers['Content-Type'] = 'text/plain'
-  response.out.write('There was an error processing your request.')
 
 def valid_forum_url(url):
   if not url:
@@ -313,23 +309,6 @@ class FofouBase(webapp.RequestHandler):
   def get_cookie_val(self):
     c = self.get_cookie()
     return c.value
-
-  def get_fofou_user(self):
-    # get user either by google user id or cookie
-    user_id = users.get_current_user()
-    user = None
-    if user_id:
-      user = FofouUser.gql("WHERE user = :1", user_id).get()
-      #if user: logging.info("Found existing user for by user_id '%s'" % str(user_id))
-    else:
-      cookie = self.get_cookie_val()
-      if cookie:
-        user = FofouUser.gql("WHERE cookie = :1", cookie).get()
-        #if user:
-        #  logging.info("Found existing user for cookie '%s'" % cookie)
-        #else:
-        #  logging.info("Didn't find user for cookie '%s'" % cookie)
-    return user
 
   def template_out(self, template_name, template_values):
     self.response.headers['Content-Type'] = 'text/html'
@@ -492,9 +471,7 @@ class ForumList(FofouBase):
         f.title_or_url = f.title or f.url
     tvals = {
       'forums' : forums,
-      # 'isadmin' : users.is_current_user_admin(),
-      'user': self.__user(),
-      'log_in_out' : get_log_in_out("/")
+      'user': self.__user()
     }
     self.template_out("templates/forum_list.html", tvals)
 
@@ -575,7 +552,15 @@ class TopicList(FofouBase):
         new_cursor = None
     return (new_cursor, topics)
 
+  def __user(self):
+    sessionId = self.request.cookies.get('sid')
+    if sessionId:
+      userId = memcache.get(sessionId)
+      if userId is not None:
+        return User.get_by_id(userId)
+
   def get(self):
+    user = self.__user()
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:
       return self.redirect("/")
@@ -585,16 +570,15 @@ class TopicList(FofouBase):
     (new_cursor, topics) = self.get_topics(forum, is_moderator, MAX_TOPICS, cursor)
     forum.title_or_url = forum.title or forum.url
     tvals = {
+      'user': user,
       'siteroot' : siteroot,
       'siteurl' : self.request.url,
       'forum' : forum,
       'topics' : topics,
       'analytics_code' : forum.analytics_code or "",
-      'new_from' : new_cursor,
-      'log_in_out' : get_log_in_out(siteroot)
+      'new_from' : new_cursor
     }
-    tmpl = os.path.join(tmpldir, "topic_list.html")
-    self.template_out(tmpl, tvals)
+    self.template_out('templates/topic_list.html', tvals)
 
 # responds to /<forumurl>/topic?id=<id>
 class TopicForm(FofouBase):
@@ -747,9 +731,6 @@ class EmailForm(FofouBase):
     tvals = {
       'siteroot' : siteroot,
       'forum' : forum,
-      'num1' : num1,
-      'num2' : num2,
-      'num3' : int(num1) + int(num2),
       'post_id' : post_id,
       'to' : to_name,
       'subject' : subject,
@@ -781,14 +762,18 @@ class EmailForm(FofouBase):
 # responds to /<forumurl>/post[?id=<topic_id>]
 class PostForm(FofouBase):
 
+  def __user(self):
+    sessionId = self.request.cookies.get('sid')
+    if sessionId:
+      userId = memcache.get(sessionId)
+      if userId is not None:
+        return User.get_by_id(userId)
+
   def get(self):
+    logging.info('get post')
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:
       return self.redirect("/")
-
-    ip = get_remote_ip()
-    if ip in BANNED_IPS:
-      return fake_error(self.response)
 
     self.send_cookie()
 
@@ -796,27 +781,23 @@ class PostForm(FofouBase):
     prevUrl = "http://"
     prevEmail = ""
     prevName = ""
-    user = self.get_fofou_user()
-    if user and user.remember_me:
-      rememberChecked = "checked"
-      prevUrl = user.homepage
-      if not prevUrl:
-        prevUrl = "http://"
-      prevName = user.name
-      prevEmail = user.email
-    (num1, num2) = (random.randint(1,9), random.randint(1,9))
+    user = self.__user()
+    # if user and user.remember_me:
+    #   rememberChecked = "checked"
+    #   prevUrl = user.homepage
+    #   if not prevUrl:
+    #     prevUrl = "http://"
+    #   prevName = user.name
+    #   prevEmail = user.email
     forum.title_or_url = forum.title or forum.url
     tvals = {
+      'user': user,
       'siteroot' : siteroot,
       'forum' : forum,
-      'num1' : num1,
-      'num2' : num2,
-      'num3' : int(num1) + int(num2),
       'rememberChecked' : rememberChecked,
       'prevUrl' : prevUrl,
       'prevEmail' : prevEmail,
-      'prevName' : prevName,
-      'log_in_out' : get_log_in_out(self.request.url)
+      'prevName' : prevName
     }
     topic_id = self.request.get('id')
     if topic_id:
@@ -824,63 +805,39 @@ class PostForm(FofouBase):
       if not topic: return self.redirect(siteroot)
       tvals['prevTopicId'] = topic_id
       tvals['prevSubject'] = topic.subject
-    tmpl = os.path.join(tmpldir, "post.html")
+    tmpl = os.path.join('templates/post.html')
     self.template_out(tmpl, tvals)
 
   def post(self):
+    user = self.__user()
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:
+      logging.info('no forum')
       return self.redirect("/")
     if self.request.get('Cancel'): 
-      return self.redirect(siteroot)
-
-    ip = get_remote_ip()
-    if ip in BANNED_IPS:
+      logging.info('cancel')
       return self.redirect(siteroot)
 
     self.send_cookie()
 
-    vals = ['TopicId', 'num1', 'num2', 'Captcha', 'Subject', 'Message', 'Remember', 'Email', 'Name', 'Url']
-    (topic_id, num1, num2, captcha, subject, message, remember_me, email, name, homepage) = req_get_vals(self.request, vals)
+    vals = ['TopicId', 'Subject', 'Message', 'Url']
+    (topic_id, subject, message, homepage) = req_get_vals(self.request, vals)
     message = to_unicode(message)
-
-    remember_me = True
-    if remember_me == "": remember_me = False
-    rememberChecked = ""
-    if remember_me: rememberChecked = "checked"
-
-    validCaptcha = True
-    try:
-      captcha = int(captcha)
-      num1 = int(num1)
-      num2 = int(num2)
-    except ValueError:
-      validCaptcha = False
 
     homepage = sanitize_homepage(homepage)
     tvals = {
+      'user': user,
       'siteroot' : siteroot,
       'forum' : forum,
-      'num1' : num1,
-      'num2' : num2,
-      'num3' : int(num1) + int(num2),
-      "prevCaptcha" : captcha,
       "prevSubject" : subject,
       "prevMessage" : message,
-      "rememberChecked" : rememberChecked,
-      "prevEmail" : email,
       "prevUrl" : homepage,
-      "prevName" : name,
-      "prevTopicId" : topic_id,
-      "log_in_out" : get_log_in_out(siteroot + "post")
+      "prevTopicId" : topic_id
     }
     
     # validate captcha and other values
     errclass = None
-    if not validCaptcha or (captcha != (num1 + num2)): errclass = 'captcha_class'
     if not message: errclass = "message_class"
-    if not name: errclass = "name_class"
-    if not valid_email(email): errclass = "email_class"
     # first post must have subject
     if not topic_id and not subject: errclass = "subject_class"
 
@@ -894,53 +851,11 @@ class PostForm(FofouBase):
 
     if errclass:
       tvals[errclass] = "error"
-      tmpl = os.path.join(tmpldir, "post.html")
+      tmpl = os.path.join("templates/post.html")
       return self.template_out(tmpl, tvals)
 
-    # get user either by google user id or cookie. Create user objects if don't
-    # already exist
-    existing_user = False
-    user_id = users.get_current_user()
-    if user_id:
-      user = FofouUser.gql("WHERE user = :1", user_id).get()
-      if not user:
-        #logging.info("Creating new user for '%s'" % str(user_id))
-        user = FofouUser(user=user_id, remember_me = remember_me, email=email, name=name, homepage=homepage)
-        user.put()
-      else:
-        existing_user = True
-        #logging.info("Found existing user for '%s'" % str(user_id))
-    else:
-      cookie = self.get_cookie_val()
-      user = FofouUser.gql("WHERE cookie = :1", cookie).get()
-      if not user:
-        #logging.info("Creating new user for cookie '%s'" % cookie)
-        user = FofouUser(cookie=cookie, remember_me = remember_me, email=email, name=name, homepage=homepage)
-        user.put()
-      else:
-        existing_user = True
-        #logging.info("Found existing user for cookie '%s'" % cookie)
-
-    if existing_user:
-      need_update = False
-      if user.remember_me != remember_me:
-        user.remember_me = remember_me
-        need_update = True
-      if user.email != email:
-        user.email = email
-        need_update = True
-      if user.name != name:
-        user.name = name
-        need_update = True
-      if user.homepage != homepage:
-        user.homepage = homepage
-        need_update = True
-      if need_update:
-        #logging.info("User needed an update")
-        user.put()
-
     if not topic_id:
-      topic = Topic(forum=forum, subject=subject, created_by=name)
+      topic = Topic(forum=forum, subject=subject, created_by=user.nickname)
       topic.put()
     else:
       topic = db.get(db.Key.from_path('Topic', int(topic_id)))
@@ -949,12 +864,14 @@ class PostForm(FofouBase):
       topic.put()
 
     user_ip_str = get_remote_ip()
-    p = Post(topic=topic, forum=forum, user=user, user_ip=0, user_ip_str=user_ip_str, message=message, sha1_digest=sha1_digest, user_name = name, user_email = email, user_homepage = homepage)
+    p = Post(topic=topic, forum=forum, user=user, user_ip=0, user_ip_str=user_ip_str, message=message, sha1_digest=sha1_digest, user_homepage = homepage)
     p.put()
     memcache.delete(rss_memcache_key(forum))
     if topic_id:
+      logging.info('topic id')
       self.redirect(siteroot + "topic?id=" + str(topic_id))
     else:
+      logging.info('no topic id')
       self.redirect(siteroot)
 
 class Signup(webapp.RequestHandler):
