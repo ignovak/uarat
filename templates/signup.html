@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h2>Registration</h2>
+  <form method='post'>
+    <ol class="details beta">
+      {% if error %}
+        <li class='error'>{{ error }}</li>
+      {% endif %}
+      {% for field in form %}
+      <li>
+        <label>{{ field.label }}<em>*</em></label>
+        <input type='{{ field.type }}' name='{{ field.name }}'
+            id='{{ field.name }}' value='{{ field.value }}' />
+      </li>
+      {% endfor %}
+    	<li><input type='submit' value='Sign In' class='clearfix' /></li>
+    </ol>
+  </form>
+{% endblock %}
+
+{% block scripts %}
+  <script type="text/javascript" src='static/registration.js'></script>
+  <script type="text/javascript">
+    var ERROR_MESSAGES = {{ errorMessages }}
+  </script>
+{% endblock %}

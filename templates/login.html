@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h2>Log in, please</h2>
+  <form action='/login' method='post'>
+    <ul class="details beta">
+      {% if error %}
+        <li class='error'>{{ error }}</li>
+      {% endif %}
+      <li><label>Email:</label><input type='text' name='email' value='{{ email }}' /></li>
+      <li><label>Password:</label><input type='password' name='password' /></li>
+    	<li><input type='submit' value='Log In' class='clearfix' /></li>
+    </ul>
+  </form>
+  <p>
+    Don't have an account? <a href='/signup'>Signup here</a>
+  </p>
+{% endblock %}
