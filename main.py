@@ -1,5 +1,5 @@
 # This code is in Public Domain. Take all the code you want, we'll just write more.
-import os, string, Cookie, sha, time, random, cgi, urllib, datetime, StringIO, pickle
+import os, string, Cookie, sha, time, random, cgi, urllib, datetime, StringIO, pickle, uuid, hashlib, re
 import wsgiref.handlers
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -65,6 +65,14 @@ def my_hostname():
   if port != "80":
       h += ":%s" % port
   return h
+
+class User(db.Model):
+  nickname = db.StringProperty()
+  email = db.EmailProperty()
+  password = db.StringProperty()
+  salt = db.StringProperty()
+  name = db.StringProperty()
+  is_admin = db.BooleanProperty(default=False)
 
 class FofouUser(db.Model):
   # according to docs UserProperty() cannot be optional, so for anon users
@@ -396,8 +404,16 @@ class ManageForums(FofouBase):
     url = "/manageforums?msg=%s" % urllib.quote(to_utf8(msg))
     return self.redirect(url)
 
+  def __user(self):
+    sessionId = self.request.cookies.get('sid')
+    if sessionId:
+      userId = memcache.get(sessionId)
+      if userId is not None:
+        return User.get_by_id(userId)
+
   def get(self):
-    if not users.is_current_user_admin():
+    user = self.__user()
+    if not user.is_admin:
       return self.redirect("/")
 
     # if there is 'forum_key' argument, this is editing an existing forum.
@@ -409,9 +425,11 @@ class ManageForums(FofouBase):
         # invalid forum key - should not happen, return to top level
         return self.redirect("/")
 
+    logging.info(user.name)
     tvals = {
       'hosturl' : self.request.host_url,
-      'forum' : forum
+      'forum' : forum,
+      'user': user
     }
     if forum:
       forum.title_non_empty = forum.title or "Title."
@@ -473,10 +491,18 @@ class ForumList(FofouBase):
         f.title_or_url = f.title or f.url
     tvals = {
       'forums' : forums,
-      'isadmin' : users.is_current_user_admin(),
+      # 'isadmin' : users.is_current_user_admin(),
+      'user': self.__user(),
       'log_in_out' : get_log_in_out("/")
     }
     self.template_out("templates/forum_list.html", tvals)
+
+  def __user(self):
+    sessionId = self.request.cookies.get('sid')
+    if sessionId:
+      userId = memcache.get(sessionId)
+      if userId is not None:
+        return User.get_by_id(userId)
 
 # responds to GET /postdel?<post_id> and /postundel?<post_id>
 class PostDelUndel(webapp.RequestHandler):
@@ -930,10 +956,117 @@ class PostForm(FofouBase):
     else:
       self.redirect(siteroot)
 
+class Signup(webapp.RequestHandler):
+  
+  def get(self):
+    template_values = {
+      'form' : [
+          {
+            'label': 'Nickname',
+            'type': 'text',
+            'name': 'nickname',
+            'value': self.request.get('nickname')
+          },
+          {
+            'label': 'Email',
+            'type': 'text',
+            'name': 'email',
+            'value': self.request.get('email')
+          },
+          {
+            'label': 'Password',
+            'type': 'password',
+            'name': 'password',
+          },
+          {
+            'label': 'Confirm password',
+            'type': 'password',
+            'name': 'confirmPassword',
+          },
+          {
+            'label': 'Name',
+            'type': 'text',
+            'name': 'name',
+            'value': self.request.get('name')
+          }
+        ]
+    }
+    path = os.path.join('templates/signup.html')
+    self.response.out.write(template.render(path, template_values))
+
+  def post(self):
+    self.nickname = self.request.get('nickname')
+    self.email = self.request.get('email')
+    self.password = self.request.get('password')
+    self.confirmPassword = self.request.get('confirmPassword')
+    self.name = self.request.get('name')
+
+    salt = str(uuid.uuid4()).replace('-','')
+    passwordHash = hashlib.sha1(self.password + salt).hexdigest()
+
+    user = User()
+    user.nickname = self.nickname
+    user.email = self.email
+    user.password = str(passwordHash)
+    user.salt = salt
+    user.name = self.name
+    user.put()
+
+    self.redirect('/')
+
+class Login(webapp.RequestHandler):
+  def get(self):
+    template_values = {
+        }
+    path = os.path.join('templates/login.html')
+    self.response.out.write(template.render(path, template_values))
+
+  def post(self):
+    self.email = self.request.get('email')
+    error = self.__error()
+    if error:
+      self.redirect('/login?error=' + error)
+
+    sessionId = str(uuid.uuid4()).replace('-','')
+    memcache.set(sessionId, self.user.key().id(), 36000)
+    self.response.headers.add_header('Set-Cookie',
+        'sid=%s; path=/' % sessionId)
+
+    self.redirect('/')
+
+  def __error(self):
+    if re.match('^[-.\w]+@(?:[a-z\d][-a-z\d]+\.)+[a-z]{2,6}$', self.email) is None:
+      return 'incorrectEmail'
+
+    self.user = User.all().filter('email =', self.email).get()
+    if self.user is None:
+      return 'wrongEmail'
+
+    salt = self.user.salt
+    password = self.request.get('password')
+    if re.match('^\w+$', password) is None:
+      password = ''
+    passwordHash = hashlib.sha1(password + salt).hexdigest()
+
+    if self.user.password != passwordHash:
+      return 'wrongPassword'
+
+class Logout(webapp.RequestHandler):
+  def get(self):
+    sessionId = self.request.cookies.get('sid')
+    memcache.delete(sessionId)
+    self.response.headers.add_header('Set-Cookie', 'sid=; path=/')
+
+    if self.request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+      self.redirect('/')
+
 def main():
   application = webapp.WSGIApplication(
      [  ('/', ForumList),
         ('/manageforums', ManageForums),
+        ('/signup', Signup),
+        ('/login', Login),
+        ('/logout', Logout),
         ('/[^/]+/postdel', PostDelUndel),
         ('/[^/]+/postundel', PostDelUndel),
         ('/[^/]+/post', PostForm),
@@ -941,7 +1074,8 @@ def main():
         ('/[^/]+/email', EmailForm),
         ('/[^/]+/rss', RssFeed),
         ('/[^/]+/rssall', RssAllFeed),
-        ('/[^/]+/?', TopicList)],
+        ('/[^/]+/?', TopicList)
+     ],
      debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 

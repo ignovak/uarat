@@ -13,16 +13,28 @@
   <h1><a href='/'><img src='http://s008.radikal.ru/i305/1106/6b/d568227876e8.png' height=75 width=245 alter='Uarat forum' /></a></h1>
   <ul id='nav'>
   	<li class='nav-item'>
-  		<a href='/'>Home</a>
+      {% if user %}
+        Welcome, {{ user.name }}
+      {% endif %}
   	</li>
   	<li class='nav-item'>
-  		<a href='/login'>Log in</a>
+  		<a href='/'>Home</a>
   	</li>
+    <li class='nav-item'>
+      {% if user %}
+        <a href='/logout'>Log out</a>
+        {% if user.is_admin %}
+          <a href='/manageforums'>Manage forums</a>
+        {% endif %}
+      {% else %}
+        <a href='/login'>Log in</a>
+      {% endif %}
+    </li>
   </ul>
   <div class='clear'></div>
 </section>
 
-{% block body %}
+{% block content %}
   
 {% endblock %}
 

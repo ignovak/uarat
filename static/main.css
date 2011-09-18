@@ -1,5 +1,5 @@
 html {
-  height: 100%;
+  min-height: 100%;
 }
 body {
   background: -webkit-gradient(linear, 0 top, 0 bottom,
@@ -7,7 +7,7 @@ body {
                        to(#fff),
                        color-stop(.5, #fff)
                        );
-  height: 100%;
+  min-height: 100%;
   margin: 0;
 }
 .clear {
