@@ -1,0 +1,44 @@
+html {
+  height: 100%;
+}
+body {
+  background: -webkit-gradient(linear, 0 top, 0 bottom,
+                       from(#ccc),
+                       to(#fff),
+                       color-stop(.5, #fff)
+                       );
+  height: 100%;
+  margin: 0;
+}
+.clear {
+  clear: both;
+}
+
+
+section {
+  background-color: burlyWood;
+  /* margin: 0; */
+  margin-bottom: 15px;
+  padding: 5px 10px;
+}
+#about-rats h1 {
+  border-bottom: 1px solid #000;
+}
+h1 {
+  /* float: left; */
+}
+#nav {
+  margin-top: -70px;
+  margin-right: 50px;
+  padding: 0;
+  float: right;
+}
+.nav-item {
+  margin-right: 10px;
+  display: block;
+  float: left;
+}
+.nav-item a {
+  color: #000;
+  text-decoration: none;
+}

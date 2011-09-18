@@ -49,7 +49,7 @@ HTTP_NOT_FOUND = 404
 RSS_MEMCACHED_KEY = "rss"
 
 def rss_memcache_key(forum):
-    return RSS_MEMCACHED_KEY + str(forum.key().id)
+  return RSS_MEMCACHED_KEY + str(forum.key().id)
 
 BANNED_IPS = {
     "59.181.121.8"  : 1,
@@ -59,12 +59,12 @@ BANNED_IPS = {
 }
 
 def my_hostname():
-    # TODO: handle https as well
-    h = "http://" + os.environ["SERVER_NAME"];
-    port = os.environ["SERVER_PORT"]
-    if port != "80":
-        h += ":%s" % port
-    return h
+  # TODO: handle https as well
+  h = "http://" + os.environ["SERVER_NAME"];
+  port = os.environ["SERVER_PORT"]
+  if port != "80":
+      h += ":%s" % port
+  return h
 
 class FofouUser(db.Model):
   # according to docs UserProperty() cannot be optional, so for anon users
@@ -330,8 +330,9 @@ class FofouBase(webapp.RequestHandler):
       c = str(self._cookie_to_set)
       c = c.split(": ", 1)[1]
       self.response.headers["Set-Cookie"] = c
-    #path = os.path.join(os.path.dirname(__file__), template_name)
-    path = template_name
+    path = os.path.join(template_name)
+    # path = os.path.join(os.path.dirname(__file__), template_name)
+    # path = template_name
     #logging.info("tmpl: %s" % path)
     res = template.render(path, template_values)
     self.response.out.write(res)
@@ -458,7 +459,7 @@ class ManageForums(FofouBase):
     tvals['forums'] = forums
     if forum and not forum.tagline:
       forum.tagline = "Tagline."
-    self.template_out("manage_forums.html", tvals)
+    self.template_out("templates/manage_forums.html", tvals)
 
 # responds to /, shows list of available forums or redirects to
 # forum management page if user is admin
@@ -475,7 +476,7 @@ class ForumList(FofouBase):
       'isadmin' : users.is_current_user_admin(),
       'log_in_out' : get_log_in_out("/")
     }
-    self.template_out("forum_list.html", tvals)
+    self.template_out("templates/forum_list.html", tvals)
 
 # responds to GET /postdel?<post_id> and /postundel?<post_id>
 class PostDelUndel(webapp.RequestHandler):
