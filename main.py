@@ -350,7 +350,8 @@ class FofouBase(webapp.RequestHandler):
 class ManageForums(FofouBase):
 
   def post(self):
-    if not users.is_current_user_admin():
+    user = self.__user()
+    if not user.is_admin:
       return self.redirect("/")
 
     forum_key = self.request.get('forum_key')
@@ -450,7 +451,7 @@ class ManageForums(FofouBase):
     self.render_rest(tvals, forum)
 
   def render_rest(self, tvals, forum=None):
-    user = users.get_current_user()
+    # user = users.get_current_user()
     forumsq = db.GqlQuery("SELECT * FROM Forum")
     forums = []
     for f in forumsq:
@@ -473,7 +474,7 @@ class ManageForums(FofouBase):
         tvals['forum_key'] = str(f.key())
       forums.append(f)
     tvals['msg'] = self.request.get('msg')
-    tvals['user'] = user
+    # tvals['user'] = user
     tvals['forums'] = forums
     if forum and not forum.tagline:
       forum.tagline = "Tagline."

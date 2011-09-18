@@ -9,6 +9,7 @@ body {
                        );
   min-height: 100%;
   margin: 0;
+  font: 12px Arial,sans-serif;
 }
 .clear {
   clear: both;
@@ -23,6 +24,30 @@ section {
 }
 #about-rats h1 {
   border-bottom: 1px solid #000;
+}
+section table {
+  border-collapse: collapse;
+  width: 100%;
+}
+section table tr {
+  min-height: 40px;
+}
+section table td, section table th {
+  border: 1px solid #9d9d9d;
+}
+section table th {
+  padding: 15px 0 15px 60px;
+  background: url('http://i270.photobucket.com/albums/jj86/Cerbst/FF/new.png') 7px 7px no-repeat;
+  width: 55%;
+  text-align: left;
+  font-weight: normal;
+}
+section table th a {
+  color: #000;
+  font-weight: bold;
+}
+section table td {
+  text-align: center;
 }
 h1 {
   /* float: left; */
@@ -39,6 +64,6 @@ h1 {
   float: left;
 }
 .nav-item a {
-  color: #000;
+  /* color: #000; */
   text-decoration: none;
 }

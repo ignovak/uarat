@@ -15,22 +15,38 @@
   <section id='about-rats'>
     <h1>About rats</h1>
 		{% if forums %}
-			<p>Available forums:
-				<ul>
+      <table>
+        <thead>
+          <tr>
+            <td>Forum</td>
+            <td>Threads</td>
+            <td>Messages</td>
+            <td>Last message</td>
+          </tr>
+        </thead>
+        <tbody>
 					{% for f in forums %}
-					<li> <a href="/{{ f.url }}"> {{ f.title_or_url }}</a></li>
+          <tr>
+            <th>
+              <div><a href="/{{ f.url }}"> {{ f.title_or_url }}</a></div>
+              <div>{{ f.sidebar }}</div>
+            </th>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
 					{% endfor %}
-				</ul>
-			</p>
+        </tbody>
+      </table>
 		{% else %}
 			<p>There are no forums created yet.</p>
 		{% endif %}
   </section>
     
-  <section>
+  <!-- <section> -->
 		{% if not isadmin %}
-			<p>Log in as admin to create new forums or manage existing forums.</p>
+			<!-- <p>Log in as admin to create new forums or manage existing forums.</p> -->
 		{% endif %}
-  </section>
+  <!-- </section> -->
 
 {% endblock %}
