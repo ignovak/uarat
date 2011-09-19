@@ -583,6 +583,13 @@ class TopicList(FofouBase):
 # responds to /<forumurl>/topic?id=<id>
 class TopicForm(FofouBase):
 
+  def __user(self):
+    sessionId = self.request.cookies.get('sid')
+    if sessionId:
+      userId = memcache.get(sessionId)
+      if userId is not None:
+        return User.get_by_id(userId)
+
   def get(self):
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:
@@ -617,22 +624,23 @@ class TopicForm(FofouBase):
       posts = Post.gql("WHERE forum = :1 AND topic = :2 AND is_deleted = False ORDER BY created_on", forum, topic).fetch(MAX_POSTS)
 
     if is_moderator:
-        for p in posts:
-            if 0 != p.user_ip:
-              p.user_ip_str = long2ip(p.user_ip)
-            if p.user_homepage:
-                p.user_homepage = sanitize_homepage(p.user_homepage)
+      for p in posts:
+        if 0 != p.user_ip:
+          p.user_ip_str = long2ip(p.user_ip)
+        if p.user_homepage:
+          p.user_homepage = sanitize_homepage(p.user_homepage)
+
     tvals = {
+      'user': self.__user(),
       'siteroot' : siteroot,
       'forum' : forum,
       'analytics_code' : forum.analytics_code or "",
       'topic' : topic,
       'is_moderator' : is_moderator,
       'is_archived' : is_archived,
-      'posts' : posts,
-      'log_in_out' : get_log_in_out(self.request.url),
+      'posts' : posts
     }
-    tmpl = os.path.join(tmpldir, "topic.html")
+    tmpl = os.path.join("templates/topic.html")
     self.template_out(tmpl, tvals)
 
 # responds to /<forumurl>/rss, returns an RSS feed of recent topics
@@ -980,21 +988,21 @@ class Logout(webapp.RequestHandler):
 
 def main():
   application = webapp.WSGIApplication(
-     [  ('/', ForumList),
-        ('/manageforums', ManageForums),
-        ('/signup', Signup),
-        ('/login', Login),
-        ('/logout', Logout),
-        ('/[^/]+/postdel', PostDelUndel),
-        ('/[^/]+/postundel', PostDelUndel),
-        ('/[^/]+/post', PostForm),
-        ('/[^/]+/topic', TopicForm),
-        ('/[^/]+/email', EmailForm),
-        ('/[^/]+/rss', RssFeed),
-        ('/[^/]+/rssall', RssAllFeed),
-        ('/[^/]+/?', TopicList)
-     ],
-     debug=True)
+    [ ('/', ForumList),
+      ('/manageforums', ManageForums),
+      ('/signup', Signup),
+      ('/login', Login),
+      ('/logout', Logout),
+      ('/[^/]+/postdel', PostDelUndel),
+      ('/[^/]+/postundel', PostDelUndel),
+      ('/[^/]+/post', PostForm),
+      ('/[^/]+/topic', TopicForm),
+      ('/[^/]+/email', EmailForm),
+      ('/[^/]+/rss', RssFeed),
+      ('/[^/]+/rssall', RssAllFeed),
+      ('/[^/]+/?', TopicList)
+    ],
+    debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == "__main__":
