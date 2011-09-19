@@ -54,18 +54,18 @@ section table td {
 h1 {
   /* float: left; */
 }
-#nav {
+#menu {
   margin-top: -70px;
   margin-right: 50px;
   padding: 0;
   float: right;
 }
-.nav-item {
+.menu-item {
   margin-right: 10px;
   display: block;
   float: left;
 }
-.nav-item a {
+.menu-item a {
   /* color: #000; */
   text-decoration: none;
 }

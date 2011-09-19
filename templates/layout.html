@@ -11,21 +11,21 @@
 
 <section>
   <h1><a href='/'><img src='http://s008.radikal.ru/i305/1106/6b/d568227876e8.png' height=75 width=245 alter='Uarat forum' /></a></h1>
-  <ul id='nav'>
-  	<li class='nav-item'>
+  <ul id='menu'>
+  	<li class='menu-item'>
       {% if user.name %}
         Welcome, {{ user.name }}
       {% endif %}
   	</li>
-  	<li class='nav-item'>
+  	<li class='menu-item'>
   		<a href='/'>Home</a>
   	</li>
-    <li class='nav-item'>
+    <li class='menu-item'>
       {% if user %}
         {% if user.is_admin %}
         <a href='/manageforums'>Manage forums</a>
       </li>
-      <li class='nav-item'>
+      <li class='menu-item'>
         {% endif %}
         <a href='/logout'>Log out</a>
       {% else %}
@@ -34,6 +34,12 @@
     </li>
   </ul>
   <div class='clear'></div>
+</section>
+
+<section id='nav'>
+  {% block nav %}
+    
+  {% endblock %}
 </section>
 
 {% block content %}
