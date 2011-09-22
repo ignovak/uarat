@@ -66,6 +66,9 @@ def my_hostname():
       h += ":%s" % port
   return h
 
+def xhr(handler):
+  return handler.request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
 class User(db.Model):
   nickname = db.StringProperty()
   email = db.EmailProperty()
@@ -818,6 +821,8 @@ class PostForm(FofouBase):
 
   def post(self):
     user = self.__user()
+    if not user:
+      return self.redirect('/?error=noUser')
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:
       logging.info('no forum')
@@ -947,7 +952,8 @@ class Login(webapp.RequestHandler):
   def get(self):
     template_values = {
       # 'error': self.ERROR_CODES.get(self.request.get('error'), 'Some error')
-      'error': self.request.get('error')
+      'error': self.request.get('error'),
+      'layout': 'ajax.html' if xhr(self) else 'layout.html'
     }
     path = os.path.join('templates/login.html')
     self.response.out.write(template.render(path, template_values))
@@ -956,26 +962,28 @@ class Login(webapp.RequestHandler):
     self.email = self.request.get('email')
     error = self.__error()
     if error:
-      return self.redirect('/login?error=' + error)
+      if xhr(self):
+        return self.response.out.write('{"error":"' + error + '"}')
+      else:
+        return self.redirect('/login?error=' + error)
 
     sessionId = str(uuid.uuid4()).replace('-','')
     memcache.set(sessionId, self.user.key().id(), 36000)
     self.response.headers.add_header('Set-Cookie',
         'sid=%s; path=/' % sessionId)
 
-    self.redirect('/')
+    if xhr(self):
+      return self.response.out.write('{"admin":"success"}')
+    else:
+      self.redirect('/')
 
   def __error(self):
     if re.match('^[-.\w]+@(?:[a-z\d][-a-z\d]+\.)+[a-z]{2,6}$', self.email) is None:
       return 'incorrectEmail'
 
     self.user = User.all().filter('email =', self.email).get()
-    logging.info(self.user)
     if self.user is None:
-      logging.info('user is none')
       return 'wrongEmail'
-    else:
-      logging.info('user is')
 
     salt = self.user.salt
     password = self.request.get('password')

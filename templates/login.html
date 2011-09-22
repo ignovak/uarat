@@ -1,18 +1,16 @@
-{% extends 'layout.html' %}
+{% extends layout %}
 
 {% block content %}
   <h2>Log in, please</h2>
-  <form id='login' action='/login' method='post'>
-    {% if error %}
-      <div class='error'>{{ error }}</div>
-    {% endif %}
+  <form id='login-form' class='form' method='post'>
+    <div class='error'>{{ error }}</div>
     <dl>
       <dt><label for='email'>Email</label></dt>
       <dd><input type='text' id='email' name='email' value='{{ email }}' /></dd>
     </dl>
     <dl>
       <dt><label for='password'>Password</label></dt>
-      <dd><input type='password' name='password' /></dd>
+      <dd><input type='password' id='password' name='password' /></dd>
     </dl>
     <dl>
       <dt></dt>

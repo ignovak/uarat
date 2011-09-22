@@ -73,11 +73,11 @@ h1 {
   text-decoration: none;
 }
 
-#login {
+.form {
   margin-left: 20px;
 }
-#login dt {
+.form dt {
   float: left;
-  min-width: 100px;
+  min-width: 120px;
   height: 20px;
 }

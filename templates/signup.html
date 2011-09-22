@@ -2,20 +2,23 @@
 
 {% block content %}
   <h2>Registration</h2>
-  <form method='post'>
-    <ol class="details beta">
-      {% if error %}
-        <li class='error'>{{ error }}</li>
-      {% endif %}
-      {% for field in form %}
-      <li>
-        <label>{{ field.label }}<em>*</em></label>
-        <input type='{{ field.type }}' name='{{ field.name }}'
-            id='{{ field.name }}' value='{{ field.value }}' />
-      </li>
-      {% endfor %}
-    	<li><input type='submit' value='Sign In' class='clearfix' /></li>
-    </ol>
+  <form id='signup' class='form' method='post'>
+    {% if error %}
+      <div class='error'>{{ error }}</div>
+    {% endif %}
+    {% for field in form %}
+      <dl>
+        <dt><label for='{{ field.name }}'>{{ field.label }}<em>*</em></label></dt>
+        <dd>
+          <input type='{{ field.type }}' name='{{ field.name }}'
+              id='{{ field.name }}' value='{{ field.value }}' />
+        </dd>
+      </dl>
+    {% endfor %}
+    <dl>
+      <dt></dt>
+      <dd><input type='submit' value='Sign Up' /></dd>
+    </dl>
   </form>
 {% endblock %}
 
