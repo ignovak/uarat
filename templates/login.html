@@ -2,15 +2,22 @@
 
 {% block content %}
   <h2>Log in, please</h2>
-  <form action='/login' method='post'>
-    <ul class="details beta">
-      {% if error %}
-        <li class='error'>{{ error }}</li>
-      {% endif %}
-      <li><label>Email:</label><input type='text' name='email' value='{{ email }}' /></li>
-      <li><label>Password:</label><input type='password' name='password' /></li>
-    	<li><input type='submit' value='Log In' class='clearfix' /></li>
-    </ul>
+  <form id='login' action='/login' method='post'>
+    {% if error %}
+      <div class='error'>{{ error }}</div>
+    {% endif %}
+    <dl>
+      <dt><label for='email'>Email</label></dt>
+      <dd><input type='text' id='email' name='email' value='{{ email }}' /></dd>
+    </dl>
+    <dl>
+      <dt><label for='password'>Password</label></dt>
+      <dd><input type='password' name='password' /></dd>
+    </dl>
+    <dl>
+      <dt></dt>
+      <dd><input type='submit' value='Log In' /></dd>
+    </dl>
   </form>
   <p>
     Don't have an account? <a href='/signup'>Signup here</a>

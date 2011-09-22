@@ -941,9 +941,14 @@ class Signup(webapp.RequestHandler):
     self.redirect('/')
 
 class Login(webapp.RequestHandler):
+  ERROR_CODES = {
+    'wrongEmail': 'Email is incorrect'
+  }
   def get(self):
     template_values = {
-        }
+      # 'error': self.ERROR_CODES.get(self.request.get('error'), 'Some error')
+      'error': self.request.get('error')
+    }
     path = os.path.join('templates/login.html')
     self.response.out.write(template.render(path, template_values))
 
@@ -951,7 +956,7 @@ class Login(webapp.RequestHandler):
     self.email = self.request.get('email')
     error = self.__error()
     if error:
-      self.redirect('/login?error=' + error)
+      return self.redirect('/login?error=' + error)
 
     sessionId = str(uuid.uuid4()).replace('-','')
     memcache.set(sessionId, self.user.key().id(), 36000)
@@ -965,8 +970,12 @@ class Login(webapp.RequestHandler):
       return 'incorrectEmail'
 
     self.user = User.all().filter('email =', self.email).get()
+    logging.info(self.user)
     if self.user is None:
+      logging.info('user is none')
       return 'wrongEmail'
+    else:
+      logging.info('user is')
 
     salt = self.user.salt
     password = self.request.get('password')
