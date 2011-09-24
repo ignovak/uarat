@@ -15,7 +15,7 @@ $(function() {
           if ( data.error ) {
             $('.error', '#dialog').text(data.error);
           } else {
-            $('#menu').addClass('user-menu');
+            $('nav').removeClass('guest').addClass('user');
             $('#dialog').dialog('close');
           };
         }, 'json');
@@ -28,8 +28,7 @@ $(function() {
 
   $('.logout-btn').click(function() {
     $.get('/logout', function(data) {
-      $('#menu').removeClass('user-menu');
-      console.log('logout');
+      $('nav').removeClass('user').addClass('guest');
     });
     return false
   });

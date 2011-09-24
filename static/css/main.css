@@ -60,6 +60,15 @@ nav {
   color: #555;
   text-decoration: underline;
 }
+.guest .menu {
+  width: 300px;
+}
+.guest .user-item {
+  display: none;
+}
+.user .login-btn {
+  display: none;
+}
 
 .announce {
   height: 70px;
@@ -113,20 +122,8 @@ h1 {
   /* float: left; */
 }
 
-.welcome, .manageforums-link, .logout-btn {
+.manageforums-link {
   display: none;
-}
-.user-menu .welcome, .user-menu .logout-btn {
-  display: inline;
-}
-.admin-menu .manageforums-link {
-  display: inline;
-}
-.user-menu .login-btn, .admin-menu .login-btn {
-  display: none;
-}
-.admin-menu .manageforums-link {
-  display: inline;
 }
 
 .form {

@@ -1,14 +1,16 @@
 # This code is in Public Domain. Take all the code you want, we'll just write more.
 import os, string, Cookie, sha, time, random, cgi, urllib, datetime, StringIO, pickle, uuid, hashlib, re
+import logging
+
 import wsgiref.handlers
-from google.appengine.api import users
+# from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import webapp
-from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from django.utils import feedgenerator
 from django.template import Context, Template
-import logging
+
+from model import User, FofouUser, Forum, Topic, Post
 from offsets import *
 
 # Structure of urls:
@@ -68,92 +70,6 @@ def my_hostname():
 
 def xhr(handler):
   return handler.request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-
-class User(db.Model):
-  nickname = db.StringProperty()
-  email = db.EmailProperty()
-  password = db.StringProperty()
-  salt = db.StringProperty()
-  name = db.StringProperty()
-  is_admin = db.BooleanProperty(default=False)
-
-class FofouUser(db.Model):
-  # according to docs UserProperty() cannot be optional, so for anon users
-  # we set it to value returned by anonUser() function
-  # user is uniquely identified by either user property (if not equal to
-  # anonUser()) or cookie
-  user = db.UserProperty()
-  cookie = db.StringProperty()
-  # email, as entered in the post form, can be empty string
-  email = db.StringProperty()
-  # name, as entered in the post form
-  name = db.StringProperty()
-  # homepage - as entered in the post form, can be empty string
-  homepage = db.StringProperty()
-  # value of 'remember_me' checkbox selected during most recent post
-  remember_me = db.BooleanProperty(default=True)
-
-class Forum(db.Model):
-  # Urls for forums are in the form /<urlpart>/<rest>
-  url = db.StringProperty(required=True)
-  # What we show as html <title> and as main header on the page
-  title = db.StringProperty()
-  # a tagline is below title
-  tagline = db.StringProperty()
-  # stuff to display in left sidebar
-  sidebar = db.TextProperty()
-  # if true, forum has been disabled. We don't support deletion so that
-  # forum can always be re-enabled in the future
-  is_disabled = db.BooleanProperty(default=False)
-  # just in case, when the forum was created. Not used.
-  created_on = db.DateTimeProperty(auto_now_add=True)
-  # name of the skin (must be one of SKINS)
-  skin = db.StringProperty()
-  # Google analytics code
-  analytics_code = db.StringProperty()
-  # Note: import_secret is obsolete
-  import_secret = db.StringProperty()
-
-# A forum is collection of topics
-class Topic(db.Model):
-  forum = db.Reference(Forum, required=True)
-  subject = db.StringProperty(required=True)
-  created_on = db.DateTimeProperty(auto_now_add=True)
-  # name of person who created the topic. Duplicates Post.user_name
-  # of the first post in this topic, for speed
-  created_by = db.StringProperty()
-  # just in case, not used
-  updated_on = db.DateTimeProperty(auto_now=True)
-  # True if first Post in this topic is deleted. Updated on deletion/undeletion
-  # of the post
-  is_deleted = db.BooleanProperty(default=False)
-  # ncomments is redundant but is faster than always quering count of Posts
-  ncomments = db.IntegerProperty(default=0)
-
-# A topic is a collection of posts
-class Post(db.Model):
-  topic = db.Reference(Topic, required=True)
-  forum = db.Reference(Forum, required=True)
-  created_on = db.DateTimeProperty(auto_now_add=True)
-  message = db.TextProperty(required=True)
-  sha1_digest = db.StringProperty(required=True)
-  # admin can delete/undelete posts. If first post in a topic is deleted,
-  # that means the topic is deleted as well
-  is_deleted = db.BooleanProperty(default=False)
-  # ip address from which this post has been made
-  user_ip_str = db.StringProperty(required=False)
-  # user_ip is an obsolete value, only used for compat with entries created before
-  # we introduced user_ip_str. If it's 0, we assume we'll use user_ip_str, otherwise
-  # we'll user user_ip
-  user_ip = db.IntegerProperty(required=True)
-
-  user = db.Reference(User, required=True)
-  # user_name, user_email and user_homepage might be different than
-  # name/homepage/email fields in user object, since they can be changed in
-  # FofouUser
-  user_name = db.StringProperty()
-  user_email = db.StringProperty()
-  user_homepage = db.StringProperty()
 
 SKINS = ["default"]
 
@@ -287,6 +203,18 @@ def get_log_in_out(url):
 
 class FofouBase(webapp.RequestHandler):
 
+  def user(self):
+    self.username = ''
+    self.role = ''
+    sessionId = self.request.cookies.get('sid')
+    if sessionId:
+      userId = memcache.get(sessionId)
+      if userId is not None:
+        user = User.get_by_id(userId)
+        self.username = user.name
+        self.role = 'user'
+        return user
+
   _cookie = None
   # returns either a FOFOU_COOKIE sent by the browser or a newly created cookie
   def get_cookie(self):
@@ -332,8 +260,7 @@ class FofouBase(webapp.RequestHandler):
 class ManageForums(FofouBase):
 
   def post(self):
-    user = self.__user()
-    if not user.is_admin:
+    if not self.user().is_admin:
       return self.redirect("/")
 
     forum_key = self.request.get('forum_key')
@@ -387,16 +314,8 @@ class ManageForums(FofouBase):
     url = "/manageforums?msg=%s" % urllib.quote(to_utf8(msg))
     return self.redirect(url)
 
-  def __user(self):
-    sessionId = self.request.cookies.get('sid')
-    if sessionId:
-      userId = memcache.get(sessionId)
-      if userId is not None:
-        return User.get_by_id(userId)
-
   def get(self):
-    user = self.__user()
-    if not user.is_admin:
+    if not self.user().is_admin:
       return self.redirect("/")
 
     # if there is 'forum_key' argument, this is editing an existing forum.
@@ -408,12 +327,11 @@ class ManageForums(FofouBase):
         # invalid forum key - should not happen, return to top level
         return self.redirect("/")
 
-    logging.info(user.name)
     tvals = {
       'hosturl' : self.request.host_url,
       'forum' : forum,
-      'menu_class': 'admin-menu',
-      'username': user.name
+      'role': 'user admin',
+      'username': self.username
     }
     if forum:
       forum.title_non_empty = forum.title or "Title."
@@ -467,25 +385,20 @@ class ManageForums(FofouBase):
 # forum management page if user is admin
 class ForumList(FofouBase):
   def get(self):
-    if users.is_current_user_admin():
-      return self.redirect("/manageforums")
+    self.user()
+    # if users.is_current_user_admin():
+    #   return self.redirect("/manageforums")
     MAX_FORUMS = 256 # if you need more, tough
-    forums = db.GqlQuery("SELECT * FROM Forum").fetch(MAX_FORUMS)
+    forums = Forum.all().fetch(MAX_FORUMS)
+    # forums = db.GqlQuery("SELECT * FROM Forum").fetch(MAX_FORUMS)
     for f in forums:
-        f.title_or_url = f.title or f.url
+      f.title_or_url = f.title or f.url
     tvals = {
       'forums' : forums,
-      'menu_class': 'user-menu',
-      'username': self.__user() and self.__user().name
+      'role': self.role,
+      'username': self.username
     }
     self.template_out("templates/forum_list.html", tvals)
-
-  def __user(self):
-    sessionId = self.request.cookies.get('sid')
-    if sessionId:
-      userId = memcache.get(sessionId)
-      if userId is not None:
-        return User.get_by_id(userId)
 
 # responds to GET /postdel?<post_id> and /postundel?<post_id>
 class PostDelUndel(webapp.RequestHandler):
@@ -557,15 +470,8 @@ class TopicList(FofouBase):
         new_cursor = None
     return (new_cursor, topics)
 
-  def __user(self):
-    sessionId = self.request.cookies.get('sid')
-    if sessionId:
-      userId = memcache.get(sessionId)
-      if userId is not None:
-        return User.get_by_id(userId)
-
   def get(self):
-    user = self.__user()
+    self.user()
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:
       return self.redirect("/")
@@ -575,8 +481,8 @@ class TopicList(FofouBase):
     (new_cursor, topics) = self.get_topics(forum, is_moderator, MAX_TOPICS, cursor)
     forum.title_or_url = forum.title or forum.url
     tvals = {
-      'menu_class': 'user-menu',
-      'username': user.name,
+      'role': self.role,
+      'username': self.username,
       'siteroot' : siteroot,
       'siteurl' : self.request.url,
       'forum' : forum,
@@ -589,14 +495,8 @@ class TopicList(FofouBase):
 # responds to /<forumurl>/topic?id=<id>
 class TopicForm(FofouBase):
 
-  def __user(self):
-    sessionId = self.request.cookies.get('sid')
-    if sessionId:
-      userId = memcache.get(sessionId)
-      if userId is not None:
-        return User.get_by_id(userId)
-
   def get(self):
+    self.user()
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:
       return self.redirect("/")
@@ -637,8 +537,8 @@ class TopicForm(FofouBase):
           p.user_homepage = sanitize_homepage(p.user_homepage)
 
     tvals = {
-      'menu_class': 'user-menu',
-      'username': self.__user().name,
+      'role': self.role,
+      'username': self.username,
       'siteroot' : siteroot,
       'forum' : forum,
       'analytics_code' : forum.analytics_code or "",
@@ -777,13 +677,6 @@ class EmailForm(FofouBase):
 # responds to /<forumurl>/post[?id=<topic_id>]
 class PostForm(FofouBase):
 
-  def __user(self):
-    sessionId = self.request.cookies.get('sid')
-    if sessionId:
-      userId = memcache.get(sessionId)
-      if userId is not None:
-        return User.get_by_id(userId)
-
   def get(self):
     logging.info('get post')
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
@@ -796,7 +689,7 @@ class PostForm(FofouBase):
     prevUrl = "http://"
     prevEmail = ""
     prevName = ""
-    user = self.__user()
+    self.user()
     # if user and user.remember_me:
     #   rememberChecked = "checked"
     #   prevUrl = user.homepage
@@ -806,8 +699,8 @@ class PostForm(FofouBase):
     #   prevEmail = user.email
     forum.title_or_url = forum.title or forum.url
     tvals = {
-      'menu_class': 'user-menu',
-      'username': user.name,
+      'role': self.role,
+      'username': self.username,
       'siteroot' : siteroot,
       'forum' : forum,
       'rememberChecked' : rememberChecked,
@@ -825,8 +718,7 @@ class PostForm(FofouBase):
     self.template_out(tmpl, tvals)
 
   def post(self):
-    user = self.__user()
-    if not user:
+    if not self.user():
       return self.redirect('/?error=noUser')
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:
@@ -844,8 +736,8 @@ class PostForm(FofouBase):
 
     homepage = sanitize_homepage(homepage)
     tvals = {
-      'menu_class': 'user-menu',
-      'username': user.name,
+      'role': self.role,
+      'username': self.username,
       'siteroot' : siteroot,
       'forum' : forum,
       "prevSubject" : subject,

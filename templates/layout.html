@@ -12,17 +12,18 @@
 
   <section class='header'>
     <h1><a href='/'><img src='/img/logo.png' height=75 width=245 alter='Uarat forum' /></a></h1>
-    <nav>
+    <nav class='{{ role|default:'guest' }}'>
       <div class='menu top-header-menu'>
         <a class='menu-item' href='/'>Форум</a>
-        <a class='menu-item' href='#'>Участники</a>
+        <a class='menu-item user-item' href='#'>Участники</a>
         <a class='menu-item' href='#'>Правила</a>
         <a class='menu-item' href='#'>Поиск</a>
-        <a class='menu-item' href='#'>Профиль</a>
-        <a class='menu-item' href='#'>Сообщения</a>
-        <a class='menu-item' href='/logout'>Выход</a>
+        <a class='menu-item user-item' href='#'>Профиль</a>
+        <a class='menu-item user-item' href='#'>Сообщения</a>
+        <a class='menu-item user-item logout-btn' id='logout-btn' href='/logout'>Выход</a>
+        <a class='menu-item login-btn' id='login-btn' href='/login'>Вход</a>
       </div>
-      <div class='menu bottom-header-menu'>
+      <div class='menu bottom-header-menu user-item'>
         <a class='menu-item' href='#'>Новые сообщения</a>
         <a class='menu-item' href='#'>Активные темы</a>
         <a class='menu-item' href='#'>Темы без ответов</a>
@@ -46,7 +47,7 @@
   </section>
 
   <section class='nav'>
-    <div class='greeting'>Привет, {{ user.name|default:'гость' }}</div>
+    <div class='greeting'>Привет, <strong>{{ user.name|default:'Гость' }}</strong>.</div>
     <div class='route'>{% block nav %} {% endblock %}</div>
   </section>
 
