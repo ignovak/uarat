@@ -9,7 +9,11 @@ body {
                        );
   min-height: 100%;
   margin: 0;
+  padding: 20px;
   font: 12px Arial,sans-serif;
+}
+a {
+  color: #000;
 }
 .clear {
   clear: both;
@@ -21,9 +25,40 @@ body {
 
 section {
   background-color: burlyWood;
-  /* margin: 0; */
-  margin-bottom: 15px;
-  padding: 5px 10px;
+  border: 1px solid #9d9d9d;
+  margin-bottom: 10px;
+}
+section h1 {
+  margin: 0;
+}
+.header {
+  height: 68px;;
+}
+.header h1 {
+  float: left;
+}
+
+nav {
+  border-bottom: 1px solid #999;
+  height: 39px;
+}
+.menu {
+  margin: 12px -10px 8px;
+  width: 600px;
+  float: right;
+  font-weight: bold;
+  display: table;
+}
+.bottom-header-menu {
+  font-size: 90%;
+}
+.menu-item {
+  display: table-cell;
+  text-decoration: none;
+}
+.menu-item:hover {
+  color: #555;
+  text-decoration: underline;
 }
 #about-rats h1 {
   border-bottom: 1px solid #000;
@@ -57,20 +92,21 @@ section table td {
 h1 {
   /* float: left; */
 }
-#menu {
-  margin-top: -70px;
-  margin-right: 50px;
-  padding: 0;
-  float: right;
+
+.welcome, .manageforums-link, .logout-btn {
+  display: none;
 }
-.menu-item {
-  margin-right: 10px;
-  display: block;
-  float: left;
+.user-menu .welcome, .user-menu .logout-btn {
+  display: inline;
 }
-.menu-item a {
-  /* color: #000; */
-  text-decoration: none;
+.admin-menu .manageforums-link {
+  display: inline;
+}
+.user-menu .login-btn, .admin-menu .login-btn {
+  display: none;
+}
+.admin-menu .manageforums-link {
+  display: inline;
 }
 
 .form {

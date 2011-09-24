@@ -1,5 +1,5 @@
 $(function() {
-  $('#login-btn').click(function() {
+  $('.login-btn').click(function() {
     $('#dialog').load('/login', function() {
       $(this).dialog({
         width: 360,
@@ -15,6 +15,7 @@ $(function() {
           if ( data.error ) {
             $('.error', '#dialog').text(data.error);
           } else {
+            $('#menu').addClass('user-menu');
             $('#dialog').dialog('close');
           };
         }, 'json');
@@ -25,8 +26,9 @@ $(function() {
     return false
   });
 
-  $('#logout-btn').click(function() {
+  $('.logout-btn').click(function() {
     $.get('/logout', function(data) {
+      $('#menu').removeClass('user-menu');
       console.log('logout');
     });
     return false

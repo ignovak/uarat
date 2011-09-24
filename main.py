@@ -412,7 +412,8 @@ class ManageForums(FofouBase):
     tvals = {
       'hosturl' : self.request.host_url,
       'forum' : forum,
-      'user': user
+      'menu_class': 'admin-menu',
+      'username': user.name
     }
     if forum:
       forum.title_non_empty = forum.title or "Title."
@@ -474,7 +475,8 @@ class ForumList(FofouBase):
         f.title_or_url = f.title or f.url
     tvals = {
       'forums' : forums,
-      'user': self.__user()
+      'menu_class': 'user-menu',
+      'username': self.__user() and self.__user().name
     }
     self.template_out("templates/forum_list.html", tvals)
 
@@ -573,7 +575,8 @@ class TopicList(FofouBase):
     (new_cursor, topics) = self.get_topics(forum, is_moderator, MAX_TOPICS, cursor)
     forum.title_or_url = forum.title or forum.url
     tvals = {
-      'user': user,
+      'menu_class': 'user-menu',
+      'username': user.name,
       'siteroot' : siteroot,
       'siteurl' : self.request.url,
       'forum' : forum,
@@ -634,7 +637,8 @@ class TopicForm(FofouBase):
           p.user_homepage = sanitize_homepage(p.user_homepage)
 
     tvals = {
-      'user': self.__user(),
+      'menu_class': 'user-menu',
+      'username': self.__user().name,
       'siteroot' : siteroot,
       'forum' : forum,
       'analytics_code' : forum.analytics_code or "",
@@ -802,7 +806,8 @@ class PostForm(FofouBase):
     #   prevEmail = user.email
     forum.title_or_url = forum.title or forum.url
     tvals = {
-      'user': user,
+      'menu_class': 'user-menu',
+      'username': user.name,
       'siteroot' : siteroot,
       'forum' : forum,
       'rememberChecked' : rememberChecked,
@@ -839,7 +844,8 @@ class PostForm(FofouBase):
 
     homepage = sanitize_homepage(homepage)
     tvals = {
-      'user': user,
+      'menu_class': 'user-menu',
+      'username': user.name,
       'siteroot' : siteroot,
       'forum' : forum,
       "prevSubject" : subject,

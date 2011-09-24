@@ -10,30 +10,42 @@
 </head>
 <body>
 
-  <section>
+  <section class='header'>
     <h1><a href='/'><img src='/img/logo.png' height=75 width=245 alter='Uarat forum' /></a></h1>
-    <ul id='menu'>
-      <li class='menu-item'>
-        {% if user.name %}
-          Welcome, {{ user.name }}
-        {% endif %}
-      </li>
-      <li class='menu-item'>
-        <a href='/'>Home</a>
-      </li>
-      <li class='menu-item'>
-        {% if user %}
-          {% if user.is_admin %}
-          <a href='/manageforums'>Manage forums</a>
-        </li>
-        <li class='menu-item'>
-          {% endif %}
-          <a id='logout-btn' href='/logout'>Log out</a>
-        {% else %}
-          <a id='login-btn' href='/login'>Log in</a>
-        {% endif %}
-      </li>
-    </ul>
+    <nav>
+      <div class='menu top-header-menu'>
+        <a class='menu-item' href='/'>Форум</a>
+        <a class='menu-item' href='#'>Участники</a>
+        <a class='menu-item' href='#'>Правила</a>
+        <a class='menu-item' href='#'>Поиск</a>
+        <a class='menu-item' href='#'>Профиль</a>
+        <a class='menu-item' href='#'>Сообщения</a>
+        <a class='menu-item' href='/logout'>Выход</a>
+      </div>
+      <div class='menu bottom-header-menu'>
+        <a class='menu-item' href='#'>Новые сообщения</a>
+        <a class='menu-item' href='#'>Активные темы</a>
+        <a class='menu-item' href='#'>Темы без ответов</a>
+        <a class='menu-item' href='#'>Мои сообщения</a>
+        <a class='menu-item' href='#'>Подписка</a>
+        <a class='menu-item' href='#'>Все прочитано</a>
+      </div>
+    </nav>
+    <!-- <ul id='menu' class='{{ menu_class }}'> -->
+    <!--   <li class='menu-item welcome'> -->
+    <!--     Welcome, {{ user.name }} -->
+    <!--   </li> -->
+    <!--   <li class='menu-item'> -->
+    <!--     <a href='/'>Home</a> -->
+    <!--   </li> -->
+    <!--   <li class='menu-item manageforums-link'> -->
+    <!--     <a href='/manageforums'>Manage forums</a> -->
+    <!--   </li> -->
+    <!--   <li class='menu-item'> -->
+    <!--     <a class='logout-btn' href='/logout'>Log out</a> -->
+    <!--     <a class='login-btn' href='/login'>Log in</a> -->
+    <!--   </li> -->
+    <!-- </ul> -->
     <div class='clear'></div>
   </section>
 
@@ -53,7 +65,8 @@
 
   <div id='dialog'></div>
 
-  <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js'></script>
+  <!-- <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js'></script> -->
+  <script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
   <script type="text/javascript" src="/static/js/jquery-ui-1.8.16.custom.min.js"></script>
   <script src='/static/js/main.js'></script>
 
