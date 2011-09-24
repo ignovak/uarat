@@ -277,8 +277,12 @@ class ManageForums(FofouBase):
         # invalid key - should not happen so go to top-level
         return self.redirect("/")
 
-    vals = ['url','title', 'tagline', 'sidebar', 'disable', 'enable', 'analyticscode']
-    (url, title, tagline, sidebar, disable, enable, analytics_code) = req_get_vals(self.request, vals)
+    vals = ['url','title', 'tagline', 'sidebar', 'group', 'disable', 'enable', 'analyticscode']
+    (url, title, tagline, sidebar, group, disable, enable, analytics_code) = req_get_vals(self.request, vals)
+
+    if group not in Forum.GROUPES:
+      # invalid group - should not happen so go to top-level
+      return self.redirect("/")
 
     errmsg = None
     if not valid_forum_url(url):
@@ -309,13 +313,20 @@ class ManageForums(FofouBase):
       forum.title = title
       forum.tagline = tagline
       forum.sidebar = sidebar
+      forum.group = group
       forum.analytics_code = analytics_code
       forum.put()
       msg = "Forum '%s' has been updated." % title_or_url
     else:
       # create a new forum
-      forum = Forum(url=url, title=title, tagline=tagline, sidebar=sidebar, analytics_code = analytics_code)
-      forum.put()
+      Forum(
+        url=url,
+        title=title,
+        tagline=tagline,
+        sidebar=sidebar,
+        group=group,
+        analytics_code=analytics_code
+      ).put()
       msg = "Forum '%s' has been created." % title_or_url
     url = "/manageforums?msg=%s" % urllib.quote(to_utf8(msg))
     return self.redirect(url)
@@ -336,6 +347,7 @@ class ManageForums(FofouBase):
     tvals = {
       'hosturl' : self.request.host_url,
       'forum' : forum,
+      'groupes': Forum.GROUPES,
       'role': self.role,
       'username': self.username
     }
@@ -402,6 +414,19 @@ class ForumList(FofouBase):
     # forums = db.GqlQuery("SELECT * FROM Forum").fetch(MAX_FORUMS)
     for f in forums:
       f.title_or_url = f.title or f.url
+
+    logging.info(forums)
+    forums = map(
+      lambda group: {
+        'title': group,
+        'forums': filter(
+          lambda forum: forum.group == group,
+          forums
+        )
+      },
+      Forum.GROUPES
+    )
+    logging.info(forums)
     tvals = {
       'forums' : forums,
       'role': self.role,
@@ -488,7 +513,8 @@ class TopicList(FofouBase):
     if not forum or forum.is_disabled:
       return self.redirect("/")
     cursor = self.request.get("from") or None
-    is_moderator = users.is_current_user_admin()
+    is_moderator = False
+    # is_moderator = users.is_current_user_admin()
     MAX_TOPICS = 75
     (new_cursor, topics) = self.get_topics(forum, is_moderator, MAX_TOPICS, cursor)
     forum.title_or_url = forum.title or forum.url

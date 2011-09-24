@@ -102,12 +102,14 @@ h1 {
 /* end nav */
 
 .forums-group {
+  border: none;
   background-color: #fff;
   margin-bottom: 4px;
 }
 .forums-group h1 {
   background-color: burlyWood;
-  border-bottom: 1px solid #9d9d9d;
+  border: 1px solid #9d9d9d;
+  border-bottom: none;
   padding: 10px 15px;
   font-size: 100%;
 }

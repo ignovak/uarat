@@ -10,9 +10,9 @@
 
 {% block content %}
 
-{% for group in groupes %}
+{% for group in forums %}
   <section class='forums-group'>
-    <h1>{{ group }}</h1>
+    <h1>{{ group.title }}</h1>
 		{% if forums %}
       <table>
         <thead>
@@ -24,7 +24,7 @@
           </tr>
         </thead>
         <tbody>
-					{% for f in forums %}
+					{% for f in group.forums %}
           <tr>
             <th>
               <div><a href="/{{ f.url }}"> {{ f.title_or_url }}</a></div>

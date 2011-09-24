@@ -6,25 +6,6 @@
 
 {% block content %}
   
-<script>
-function onUrlFieldChange() {
-	var val = $("urlFieldId").value;
-	$("underUrlTxt").innerHTML = "Full url: {{ hosturl }}/" + val;
-	return true;
-}
-function onTitleFieldChange() {
-	$("titleId").innerHTML = $("titleFieldId").value;
-	return true;
-}
-function onTaglineFieldChange() {
-	$("taglineId").innerHTML = $("taglineFieldId").value;
-	return true;
-}
-function onSidebarFieldChange() {
-	$("sidebarId").innerHTML = $("sidebarFieldId").value;
-	return true;
-}
-</script>
 <table>
 <tbody>
 	<tr>
@@ -65,26 +46,36 @@ function onSidebarFieldChange() {
 			<table class="form">
 					<tr>
 						<td>Url</td>
-						<td><input class="{{ urlclass }}" type="edit" size="60" maxlength="60" name="url" id="urlFieldId" onchange="return onUrlFieldChange();" onkeyup="return onUrlFieldChange();" value="{{ prevurl|escape }}"></input>
+						<td><input class="{{ urlclass }}" type="edit" size="60" maxlength="60" name="url" id="urlFieldId" value="{{ prevurl|escape }}"></input>
 							<div>{{ errmsg }}</div>
 							<div id="underUrlTxt">Full url: {{ hosturl }}/{{ forum.url }}</div>
 						</td>
 					</tr>
 					<tr>
 						<td>Title</td>
-						<td><input type="edit" size="60" maxlength="128" name="title" id="titleFieldId" onchange="return onTitleFieldChange();" onkeyup="return onTitleFieldChange();" value="{{ prevtitle|escape }}"></input></td>
+						<td><input type="edit" size="60" maxlength="128" name="title" id="titleFieldId" value="{{ prevtitle|escape }}"></input></td>
 					</tr>
 					<tr>
 						<td>Tagline</td>
-						<td><input type="edit" size="60" maxlength="256" name="tagline" id="taglineFieldId" onchange="return onTaglineFieldChange();" onkeyup="return onTaglineFieldChange();" value="{{ prevtagline|escape }}"></input></td>
+						<td><input type="edit" size="60" maxlength="256" name="tagline" id="taglineFieldId" value="{{ prevtagline|escape }}"></input></td>
 					</tr>
 					<tr>
 						<td valign="top">Analytics code</td>
 						<td><input type="edit" size="60" maxlength="256" name="analyticscode" value="{{ prevanalyticscode|escape }}"></input></td>
 					</tr>
 					<tr>
+						<td valign="top">Group</td>
+						<td>
+              <select name='group' id='group'>
+                {% for group in groupes %}
+                  <option value='{{ group }}'>{{ group }}</option>
+                {% endfor %}
+              </select>
+            </td>
+					</tr>
+					<tr>
 						<td valign="top">Sidebar</td>
-						<td><textarea name="sidebar" rows="6" cols="45" id="sidebarFieldId" onchange="return onSidebarFieldChange();" onkeyup="return onSidebarFieldChange();">{{ prevsidebar|escape }}</textarea></td>
+						<td><textarea name="sidebar" rows="6" cols="45" id="sidebarFieldId" >{{ prevsidebar|escape }}</textarea></td>
 					</tr>
 					<tr>
 						<td></td>
