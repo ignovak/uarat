@@ -17,10 +17,14 @@
       <table>
         <thead>
           <tr>
-            <td>Forum</td>
-            <td>Threads</td>
-            <td>Messages</td>
-            <td>Last message</td>
+            <td>Форум</td>
+            <td>Тем</td>
+            <td>Сообщений</td>
+            <td>Последнее сообщение</td>
+            <!-- <td>Forum</td> -->
+            <!-- <td>Threads</td> -->
+            <!-- <td>Messages</td> -->
+            <!-- <td>Last message</td> -->
           </tr>
         </thead>
         <tbody>
@@ -28,7 +32,7 @@
           <tr>
             <th>
               <div><a href="/{{ f.url }}"> {{ f.title_or_url }}</a></div>
-              <div>{{ f.sidebar }}</div>
+              <div class='description'>{{ f.sidebar }}</div>
             </th>
             <td></td>
             <td></td>

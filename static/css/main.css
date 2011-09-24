@@ -117,7 +117,7 @@ section table {
   border-collapse: collapse;
   width: 100%;
 }
-section table tr {
+section tbody tr {
   /* min-height: 40px; */
   height: 60px;
 }
@@ -139,8 +139,17 @@ section table th a {
 section table td {
   text-align: center;
 }
-h1 {
-  /* float: left; */
+section thead tr {
+  height: 10px;
+  font-weight: bold;
+}
+section thead td {
+  padding: 3px 10px;
+  font-size: 90%;
+  text-align: left;
+}
+.description {
+  font-size: 90%;
 }
 
 .manageforums-link {

@@ -207,6 +207,7 @@ class FofouBase(webapp.RequestHandler):
   def user(self):
     self.username = ''
     self.role = ''
+    self.is_admin = False
     sessionId = self.request.cookies.get('sid')
     if sessionId:
       userId = memcache.get(sessionId)
@@ -214,6 +215,7 @@ class FofouBase(webapp.RequestHandler):
         user = User.get_by_id(userId)
         self.username = user.name
         if user.is_admin:
+          self.is_admin = True
           self.role = 'user admin'
         else:
           self.role = 'user'
@@ -266,7 +268,8 @@ class ManageForums(FofouBase):
   '''
 
   def post(self):
-    if not self.user().is_admin:
+    self.user()
+    if not self.is_admin:
       return self.redirect("/")
 
     forum_key = self.request.get('forum_key')
@@ -332,7 +335,8 @@ class ManageForums(FofouBase):
     return self.redirect(url)
 
   def get(self):
-    if not self.user().is_admin:
+    self.user()
+    if not self.is_admin:
       return self.redirect("/")
 
     # if there is 'forum_key' argument, this is editing an existing forum.
