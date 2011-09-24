@@ -28,6 +28,7 @@ class FofouUser(db.Model):
   remember_me = db.BooleanProperty(default=True)
 
 class Forum(db.Model):
+  GROUPES = ['About rats', 'Nurseries', 'Ad board', 'Other', 'Techical']
   # Urls for forums are in the form /<urlpart>/<rest>
   url = db.StringProperty(required=True)
   # What we show as html <title> and as main header on the page
@@ -47,6 +48,7 @@ class Forum(db.Model):
   analytics_code = db.StringProperty()
   # Note: import_secret is obsolete
   import_secret = db.StringProperty()
+  group = db.StringProperty(choices=set(GROUPES))
 
 # A forum is collection of topics
 class Topic(db.Model):

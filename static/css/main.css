@@ -22,75 +22,94 @@ a {
   color: #f00;
 }
 
-
 section {
   background-color: burlyWood;
   border: 1px solid #9d9d9d;
   margin-bottom: 10px;
 }
-section h1 {
+h1 {
   margin: 0;
 }
 
-.header {
-  height: 68px;;
-}
-.header h1 {
-  float: left;
-}
-nav {
-  border-bottom: 1px solid #999;
-  height: 39px;
-}
-.menu {
-  margin: 12px -10px 8px;
-  width: 600px;
-  float: right;
-  font-weight: bold;
-  display: table;
-}
-.bottom-header-menu {
-  font-size: 90%;
-}
-.menu-item {
-  display: table-cell;
-  text-decoration: none;
-}
-.menu-item:hover {
-  color: #555;
-  text-decoration: underline;
-}
-.guest .menu {
-  width: 300px;
-}
-.guest .user-item {
-  display: none;
-}
-.user .login-btn {
-  display: none;
-}
+/* header */
+  .header {
+    height: 68px;;
+  }
+  .header h1 {
+    float: left;
+  }
+  nav {
+    border-bottom: 1px solid #999;
+    height: 39px;
+  }
+  .menu {
+    margin: 12px -10px 8px;
+    width: 600px;
+    float: right;
+    font-weight: bold;
+    display: table;
+  }
+  .bottom-header-menu {
+    font-size: 90%;
+  }
+  .menu-item {
+    display: table-cell;
+    text-decoration: none;
+  }
+  .menu-item:hover {
+    color: #555;
+    text-decoration: underline;
+  }
+  .guest .menu {
+    width: 300px;
+  }
+  .guest .user-item {
+    display: none;
+  }
+  .user .login-btn {
+    display: none;
+  }
+  .announce {
+    height: 70px;
+  }
+  .manage-forums {
+    display: none;
+  }
+  .admin .menu {
+    width: 700px;
+  }
+  .admin .manage-forums {
+    display: table-cell;
+  }
+/* end header */
 
-.announce {
-  height: 70px;
-}
+/* nav */
+  .nav {
+    padding: 8px 10px;
+  }
+  .greeting {
+    border-bottom: 1px solid #000;
+    padding-bottom: 10px;
+    color: #333;
+    font-size: 90%;
+  }
+  .route {
+    border-top: 1px solid #9d9d9d;
+    padding-top: 10px;
+    color: #333;
+    font-weight: bold;
+  }
+/* end nav */
 
-.nav {
-  padding: 8px 10px;
+.forums-group {
+  background-color: #fff;
+  margin-bottom: 4px;
 }
-.greeting {
-  border-bottom: 1px solid #000;
-  padding-bottom: 10px;
-  color: #333;
-  font-size: 90%;
-}
-.route {
-  border-top: 1px solid #9d9d9d;
-  padding-top: 10px;
-  color: #333;
-  font-weight: bold;
-}
-#about-rats h1 {
-  border-bottom: 1px solid #000;
+.forums-group h1 {
+  background-color: burlyWood;
+  border-bottom: 1px solid #9d9d9d;
+  padding: 10px 15px;
+  font-size: 100%;
 }
 section table {
   border-collapse: collapse;

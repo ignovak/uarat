@@ -5,13 +5,14 @@
 {% endblock %}
 
 {% block nav %}
-  &#187;&#160; Rat forum
+  &#187;&#160; Всеукраинский форум любителей декоративных крыс
 {% endblock %}
 
 {% block content %}
-  
-  <section id='about-rats'>
-    <h1>About rats</h1>
+
+{% for group in groupes %}
+  <section class='forums-group'>
+    <h1>{{ group }}</h1>
 		{% if forums %}
       <table>
         <thead>
@@ -40,11 +41,6 @@
 			<p>There are no forums created yet.</p>
 		{% endif %}
   </section>
-    
-  <!-- <section> -->
-		{% if not isadmin %}
-			<!-- <p>Log in as admin to create new forums or manage existing forums.</p> -->
-		{% endif %}
-  <!-- </section> -->
-
+{% endfor %}
+  
 {% endblock %}

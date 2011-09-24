@@ -20,6 +20,7 @@
         <a class='menu-item' href='#'>Поиск</a>
         <a class='menu-item user-item' href='#'>Профиль</a>
         <a class='menu-item user-item' href='#'>Сообщения</a>
+        <a class='menu-item manage-forums' href='/manageforums'>Управление форумами</a>
         <a class='menu-item user-item logout-btn' id='logout-btn' href='/logout'>Выход</a>
         <a class='menu-item login-btn' id='login-btn' href='/login'>Вход</a>
       </div>
@@ -47,7 +48,7 @@
   </section>
 
   <section class='nav'>
-    <div class='greeting'>Привет, <strong>{{ user.name|default:'Гость' }}</strong>.</div>
+    <div class='greeting'>Привет, <strong>{{ username|default:'Гость' }}</strong>.</div>
     <div class='route'>{% block nav %} {% endblock %}</div>
   </section>
 

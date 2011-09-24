@@ -5,7 +5,7 @@ import logging
 import wsgiref.handlers
 # from google.appengine.api import users
 from google.appengine.api import memcache
-from google.appengine.ext import webapp
+from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp import template
 from django.utils import feedgenerator
 from django.template import Context, Template
@@ -204,7 +204,6 @@ def get_log_in_out(url):
     return "<a href=\"%s\">Log in or register</a>" % users.create_login_url(url)    
 
 class FofouBase(webapp.RequestHandler):
-
   def user(self):
     self.username = ''
     self.role = ''
@@ -214,7 +213,10 @@ class FofouBase(webapp.RequestHandler):
       if userId is not None:
         user = User.get_by_id(userId)
         self.username = user.name
-        self.role = 'user'
+        if user.is_admin:
+          self.role = 'user admin'
+        else:
+          self.role = 'user'
         return user
 
   _cookie = None
@@ -334,7 +336,7 @@ class ManageForums(FofouBase):
     tvals = {
       'hosturl' : self.request.host_url,
       'forum' : forum,
-      'role': 'user admin',
+      'role': self.role,
       'username': self.username
     }
     if forum:
@@ -390,6 +392,7 @@ class ForumList(FofouBase):
   responds to /, shows list of available forums or redirects to
   forum management page if user is admin
   '''
+
   def get(self):
     self.user()
     # if users.is_current_user_admin():
@@ -402,7 +405,8 @@ class ForumList(FofouBase):
     tvals = {
       'forums' : forums,
       'role': self.role,
-      'username': self.username
+      'username': self.username,
+      'groupes': Forum.GROUPES
     }
     self.template_out("templates/forum_list.html", tvals)
 
@@ -798,7 +802,6 @@ class PostForm(FofouBase):
       self.redirect(siteroot)
 
 class Signup(webapp.RequestHandler):
-  
   def get(self):
     template_values = {
       'form' : [
