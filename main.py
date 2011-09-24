@@ -144,7 +144,7 @@ def valid_forum_url(url):
     return False
 
 def sanitize_homepage(s):
-    # prevent javascript injection
+    'prevent javascript injection'
     if not (s.startswith("http://") or s.startswith("https://")):
         return ""
     # 'http://' is the default value we put, so if unchanged, consider it
@@ -152,9 +152,11 @@ def sanitize_homepage(s):
     if s == "http://": return ""
     return s
 
-# very simplistic check for <txt> being a valid e-mail address
 def valid_email(txt):
-  # allow empty strings
+  '''
+  very simplistic check for <txt> being a valid e-mail address
+  allow empty strings
+  '''
   if not txt:
     return True
   if '@' not in txt:
@@ -255,9 +257,11 @@ class FofouBase(webapp.RequestHandler):
     res = template.render(path, template_values)
     self.response.out.write(res)
 
-# responds to GET /manageforums[?forum=<key>&disable=yes&enable=yes]
-# and POST /manageforums with values from the form
 class ManageForums(FofouBase):
+  '''
+  responds to GET /manageforums[?forum=<key>&disable=yes&enable=yes]
+  and POST /manageforums with values from the form
+  '''
 
   def post(self):
     if not self.user().is_admin:
@@ -381,9 +385,11 @@ class ManageForums(FofouBase):
       forum.tagline = "Tagline."
     self.template_out("templates/manage_forums.html", tvals)
 
-# responds to /, shows list of available forums or redirects to
-# forum management page if user is admin
 class ForumList(FofouBase):
+  '''
+  responds to /, shows list of available forums or redirects to
+  forum management page if user is admin
+  '''
   def get(self):
     self.user()
     # if users.is_current_user_admin():
@@ -400,8 +406,8 @@ class ForumList(FofouBase):
     }
     self.template_out("templates/forum_list.html", tvals)
 
-# responds to GET /postdel?<post_id> and /postundel?<post_id>
 class PostDelUndel(webapp.RequestHandler):
+  'responds to GET /postdel?<post_id> and /postundel?<post_id>'
   def get(self):
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:
@@ -450,9 +456,11 @@ class PostDelUndel(webapp.RequestHandler):
     topic_url = siteroot + "topic?id=" + str(topic.key().id())
     self.redirect(topic_url)
     
-# responds to /<forumurl>/[?from=<from>]
-# shows a list of topics, potentially starting from topic N
 class TopicList(FofouBase):
+  '''
+  responds to /<forumurl>/[?from=<from>]
+  shows a list of topics, potentially starting from topic N
+  '''
 
   def get_topics(self, forum, is_moderator, max_topics, cursor):
     # note: building query manually beccause gql() don't work with cursor
@@ -492,8 +500,8 @@ class TopicList(FofouBase):
     }
     self.template_out('templates/topic_list.html', tvals)
 
-# responds to /<forumurl>/topic?id=<id>
 class TopicForm(FofouBase):
+  'responds to /<forumurl>/topic?id=<id>'
 
   def get(self):
     self.user()
@@ -550,10 +558,12 @@ class TopicForm(FofouBase):
     tmpl = os.path.join("templates/topic.html")
     self.template_out(tmpl, tvals)
 
-# responds to /<forumurl>/rss, returns an RSS feed of recent topics
-# (taking into account only the first post in a topic - that's what
-# joelonsoftware forum rss feed does)
 class RssFeed(webapp.RequestHandler):
+  '''
+  responds to /<forumurl>/rss, returns an RSS feed of recent topics
+  (taking into account only the first post in a topic - that's what
+  joelonsoftware forum rss feed does)
+  '''
 
   def get(self):
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
@@ -593,9 +603,11 @@ class RssFeed(webapp.RequestHandler):
     self.response.out.write(feedtxt)
     memcache.add(rss_memcache_key(forum), feedtxt)
 
-# responds to /<forumurl>/rssall, returns an RSS feed of all recent posts
-# This is good for forum admins/moderators who want to monitor all posts
 class RssAllFeed(webapp.RequestHandler):
+  '''
+  responds to /<forumurl>/rssall, returns an RSS feed of all recent posts
+  This is good for forum admins/moderators who want to monitor all posts
+  '''
 
   def get(self):
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
@@ -628,8 +640,8 @@ class RssAllFeed(webapp.RequestHandler):
     self.response.headers['Content-Type'] = 'text/xml'
     self.response.out.write(feedtxt)
 
-# responds to /<forumurl>/email[?post_id=<post_id>]
 class EmailForm(FofouBase):
+  'responds to /<forumurl>/email[?post_id=<post_id>]'
 
   def get(self):
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
@@ -674,8 +686,8 @@ class EmailForm(FofouBase):
     tmpl = os.path.join(tmpldir, "email_sent.html")
     self.template_out(tmpl, tvals)
 
-# responds to /<forumurl>/post[?id=<topic_id>]
 class PostForm(FofouBase):
+  'responds to /<forumurl>/post[?id=<topic_id>]'
 
   def get(self):
     logging.info('get post')
