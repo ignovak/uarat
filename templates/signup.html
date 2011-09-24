@@ -1,8 +1,8 @@
-{% extends 'layout.html' %}
+{% extends layout %}
 
 {% block content %}
   <h2>Registration</h2>
-  <form id='signup' class='form' method='post'>
+  <form id='signup-form' class='form' method='post'>
     {% if error %}
       <div class='error'>{{ error }}</div>
     {% endif %}

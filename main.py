@@ -835,35 +835,36 @@ class Signup(webapp.RequestHandler):
   def get(self):
     template_values = {
       'form' : [
-          {
-            'label': 'Nickname',
-            'type': 'text',
-            'name': 'nickname',
-            'value': self.request.get('nickname')
-          },
-          {
-            'label': 'Email',
-            'type': 'text',
-            'name': 'email',
-            'value': self.request.get('email')
-          },
-          {
-            'label': 'Password',
-            'type': 'password',
-            'name': 'password',
-          },
-          {
-            'label': 'Confirm password',
-            'type': 'password',
-            'name': 'confirmPassword',
-          },
-          {
-            'label': 'Name',
-            'type': 'text',
-            'name': 'name',
-            'value': self.request.get('name')
-          }
-        ]
+        {
+          'label': 'Nickname',
+          'type': 'text',
+          'name': 'nickname',
+          'value': self.request.get('nickname')
+        },
+        {
+          'label': 'Email',
+          'type': 'text',
+          'name': 'email',
+          'value': self.request.get('email')
+        },
+        {
+          'label': 'Password',
+          'type': 'password',
+          'name': 'password',
+        },
+        {
+          'label': 'Confirm password',
+          'type': 'password',
+          'name': 'confirmPassword',
+        },
+        {
+          'label': 'Name',
+          'type': 'text',
+          'name': 'name',
+          'value': self.request.get('name')
+        }
+      ],
+      'layout': 'ajax.html' if xhr(self) else 'layout.html'
     }
     path = os.path.join('templates/signup.html')
     self.response.out.write(template.render(path, template_values))
@@ -878,15 +879,24 @@ class Signup(webapp.RequestHandler):
     salt = str(uuid.uuid4()).replace('-','')
     passwordHash = hashlib.sha1(self.password + salt).hexdigest()
 
-    user = User()
-    user.nickname = self.nickname
-    user.email = self.email
-    user.password = str(passwordHash)
-    user.salt = salt
-    user.name = self.name
-    user.put()
+    key = User(
+      nickname = self.nickname,
+      email = self.email,
+      password = str(passwordHash),
+      salt = salt,
+      name = self.name
+    ).put()
 
-    self.redirect('/')
+    sessionId = str(uuid.uuid4()).replace('-','')
+    memcache.set(sessionId, key.id(), 36000)
+    self.response.headers.add_header('Set-Cookie',
+        'sid=%s; path=/' % sessionId)
+
+    if xhr(self):
+      resp = '{"username": "' + self.name + '"}'
+      return self.response.out.write(resp)
+    else:
+      self.redirect('/')
 
 class Login(webapp.RequestHandler):
   ERROR_CODES = {
@@ -916,7 +926,9 @@ class Login(webapp.RequestHandler):
         'sid=%s; path=/' % sessionId)
 
     if xhr(self):
-      return self.response.out.write('{"admin":"success"}')
+      role = 'user admin' if self.user.is_admin else 'user'
+      resp = '{"role":"' + role + '", "username": "' + self.user.name + '"}'
+      return self.response.out.write(resp)
     else:
       self.redirect('/')
 
