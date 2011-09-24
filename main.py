@@ -552,7 +552,8 @@ class TopicForm(FofouBase):
     if not topic:
       return self.redirect(siteroot)
 
-    is_moderator = users.is_current_user_admin()
+    # is_moderator = users.is_current_user_admin()
+    is_moderator = False
     if topic.is_deleted and not is_moderator:
       return self.redirect(siteroot)
 
@@ -764,7 +765,8 @@ class PostForm(FofouBase):
     self.template_out(tmpl, tvals)
 
   def post(self):
-    if not self.user():
+    user = self.user()
+    if not user:
       return self.redirect('/?error=noUser')
     (forum, siteroot, tmpldir) = forum_siteroot_tmpldir_from_url(self.request.path_info)
     if not forum or forum.is_disabled:

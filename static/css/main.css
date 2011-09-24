@@ -101,12 +101,12 @@ h1 {
   }
 /* end nav */
 
-.forums-group {
+section.content {
   border: none;
   background-color: #fff;
   margin-bottom: 4px;
 }
-.forums-group h1 {
+section.content h1 {
   background-color: burlyWood;
   border: 1px solid #9d9d9d;
   border-bottom: none;
@@ -127,7 +127,7 @@ section table td, section table th {
 section table th {
   /* padding: 15px 0 15px 60px; */
   padding-left: 60px;
-  background: url('http://i270.photobucket.com/albums/jj86/Cerbst/FF/new.png') 8px 8px no-repeat;
+  background: url('/img/label-icon.png') 8px 8px no-repeat;
   width: 55%;
   text-align: left;
   font-weight: normal;
@@ -151,6 +151,13 @@ section thead td {
 .description {
   font-size: 90%;
 }
+table.topic th {
+  background: none;
+  width: 120px;
+}
+table.topic td {
+  text-align: left;
+}
 
 .manageforums-link {
   display: none;
@@ -163,4 +170,8 @@ section thead td {
   float: left;
   min-width: 120px;
   height: 20px;
+}
+
+.searchBox {
+  display: none;
 }

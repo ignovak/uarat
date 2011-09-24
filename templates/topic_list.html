@@ -5,20 +5,26 @@
 {% endblock %}
 
 {% block nav %}
-  &gt;&gt; <a href='/'>Rat forum</a> &gt;&gt; {{ forum.title_or_url }}
+  &#187;&#160; <a href='/'>Всеукраинский форум любителей декоративных крыс</a>
+  &#187;&#160; {{ forum.title_or_url }}
 {% endblock %}
 
 {% block content %}
   
-<section>
+<section class='content'>
   
+  <h1>{{ forum.title_or_url }}</h1>
   <table>
     <thead>
       <tr>
-        <td>Thread</td>
-        <td>Messages</td>
-        <td>Views</td>
-        <td>Last author</td>
+        <td>Тема</td>
+        <td>Ответов</td>
+        <td>Просмотров</td>
+        <td>Последнее сообщение</td>
+        <!-- <td>Thread</td> -->
+        <!-- <td>Messages</td> -->
+        <!-- <td>Views</td> -->
+        <!-- <td>Last author</td> -->
       </tr>
     </thead>
 <tbody>
