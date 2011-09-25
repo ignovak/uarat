@@ -9,11 +9,7 @@ $(function() {
       });
 
       $('#login-form').submit(function() {
-        var params = {
-          email: $('#email').val(),
-          password: $('#password').val()
-        };
-        $.post('/login', params, function(data) {
+        $.post('/login', $(this).serialize(), function(data) {
           if ( data.error ) {
             $('.error', '#dialog').text(data.error);
           } else {
@@ -29,11 +25,7 @@ $(function() {
         $('#dialog').load('/signup', function() {
           $('#ui-dialog-title-dialog').text('Sign Up')
           $('#signup-form').submit(function() {
-            var params = {};
-            $('input[type!=submit]', this).each(function() {
-              params[this.name] = this.value;
-            });
-            $.post('/signup', params, function(data) {
+            $.post('/signup', $(this).serialize(), function(data) {
               if ( data.error ) {
                 $('.error', '#dialog').text(data.error);
               } else {
@@ -61,5 +53,33 @@ $(function() {
     return false
   });
 
+  $('.post-link').click(function() {
+    var url = this.href;
+    if ( $('#post-form').length ) {
+      $('textarea', '#post-form').focus();
+    } else {
+      $.get(url, function(data) {
+        $(data).insertAfter($('.content'));
+        $('textarea', '#post-form').focus();
+
+        $('#post-form').submit(function() {
+          $.post(url, $(this).serialize(), function(data) {
+            console.log(data);
+            return
+            if ( data.error ) {
+              $('.error', '#dialog').text(data.error);
+            } else {
+              $('nav').removeClass('guest').addClass(data.role);
+              $('strong', '.greeting').text(data.username);
+              $('#dialog').dialog('close');
+            };
+          }, 'json');
+          return false;
+        });
+
+      });
+    };
+    return false
+  })
 
 });

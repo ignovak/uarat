@@ -419,7 +419,6 @@ class ForumList(FofouBase):
     for f in forums:
       f.title_or_url = f.title or f.url
 
-    logging.info(forums)
     forums = map(
       lambda group: {
         'title': group,
@@ -430,7 +429,6 @@ class ForumList(FofouBase):
       },
       Forum.GROUPES
     )
-    logging.info(forums)
     tvals = {
       'forums' : forums,
       'role': self.role,
@@ -748,6 +746,7 @@ class PostForm(FofouBase):
     tvals = {
       'role': self.role,
       'username': self.username,
+      'layout': 'ajax.html' if xhr(self) else 'layout.html',
       'siteroot' : siteroot,
       'forum' : forum,
       'rememberChecked' : rememberChecked,

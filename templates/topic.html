@@ -12,90 +12,109 @@
 
 {% block content %}
 
+<div class='page-links'>
+	<div class='page-link'>Страница: 1</div>
+	<a class='post-link' href='{{ siteroot }}post?id={{ topic.key.id }}'>Ответить</a>
+</div>
 <section class='content'>
   <h1>{{ topic.subject|escape }}</h1>
-  <table class='topic'>
-    <tbody>
-      {% for post in posts %}
-        <tr>
-          <th></th>
-          <td>
-            <a name="{{ post.key.id }}"</a>
-            <div>
-              {% if post.is_deleted %}
-                <div class="post deleted">{{ post.message|striptags|escape|urlize|linebreaksbr }}</div>
-              {% else %}
-                <div class="post">{{ post.message|striptags|escape|urlize|linebreaksbr }}</div>
-              {% endif %}
-              <div class="signature">
-                <a href="{{ siteroot }}topic?id={{ topic.key.id }}#{{ post.key.id }}" title="Permalink" onmouseover="rolloverOn('link', {{ post.key.id }});" onmouseout="rolloverOff();"><img align="right" id="link{{ post.key.id }}" src="/img/link.jpg" alt="Permalink" border="0" height="16" width="16"></a>
+  {% for post in posts %}
+    <div id='{{ post.key.id }}' class='post'>
+      <div class='post-author'>
+      </div>
+      <div class='post-info'>
+        <div class='post-date'>{{ post.created_on|date:"F jS, Y g:ia" }}</div>
+        <div class='post-number'>1</div>
+      </div>
+      <div class='post-body'>
+        {{ post.message|striptags|escape|urlize|linebreaksbr }}
+      </div>
+      <div class='post-links'>
+      </div>
+    </div>
+  {% endfor %}
+  <!-- <table class='topic'> -->
+  <!--   <tbody> -->
+  <!--     {% for post in posts %} -->
+  <!--       <tr> -->
+  <!--         <th></th> -->
+  <!--         <td> -->
+  <!--           <a name="{{ post.key.id }}"</a> -->
+  <!--           <div> -->
+  <!--             {% if post.is_deleted %} -->
+  <!--               <div class="post deleted">{{ post.message|striptags|escape|urlize|linebreaksbr }}</div> -->
+  <!--             {% else %} -->
+  <!--               <div class="post">{{ post.message|striptags|escape|urlize|linebreaksbr }}</div> -->
+  <!--             {% endif %} -->
+  <!--             <div class="signature"> -->
+  <!--               <a href="{{ siteroot }}topic?id={{ topic.key.id }}#{{ post.key.id }}" title="Permalink" onmouseover="rolloverOn('link', {{ post.key.id }});" onmouseout="rolloverOff();"><img align="right" id="link{{ post.key.id }}" src="/img/link.jpg" alt="Permalink" border="0" height="16" width="16"></a> -->
 
-                {% comment %}
-                {% if post.user_email %}
-                  <a href="{{ siteroot }}email?post_id={{ post.key.id }}" title="Send private email" onmouseover="rolloverOn('email', {{ post.key.id }});" onmouseout="rolloverOff();"><img align="right" id="email{{ post.key.id }}" src="/img/email.jpg" alt="Send private email" border="0" height="16" width="16"></a>
-                {% endif %}
-                {% endcomment %}
+  <!--               {% comment %} -->
+  <!--               {% if post.user_email %} -->
+  <!--                 <a href="{{ siteroot }}email?post_id={{ post.key.id }}" title="Send private email" onmouseover="rolloverOn('email', {{ post.key.id }});" onmouseout="rolloverOff();"><img align="right" id="email{{ post.key.id }}" src="/img/email.jpg" alt="Send private email" border="0" height="16" width="16"></a> -->
+  <!--               {% endif %} -->
+  <!--               {% endcomment %} -->
 
-                {% if is_moderator %}
-                  {% if post.is_deleted %}
-                    <a href="{{ siteroot }}postundel?{{ post.key.id }}" title="Undelete Post" onmouseover="rolloverOn('undo', {{ post.key.id }});" onmouseout="rolloverOff();"><img align="right" id="undo{{ post.key.id }}" src="/img/undo.jpg" width="16" height="16" border="0" /></a>
-                  {% else %}
-                    <a href="{{ siteroot }}postdel?{{ post.key.id }}" title="Delete Post" onmouseover="rolloverOn('delete', {{ post.key.id }});" onmouseout="rolloverOff();"><img align="right" id="delete{{ post.key.id }}" src="/img/delete.jpg" width="16" height="16" border="0" /></a>
-                  {% endif %}
-                {% endif %}
-                {% if post.user_homepage %}
-                  <a href="{{ post.user_homepage }}">{{ post.user_name|striptags|escape }}</a>
-                {% else %}
-                  {{ post.user_name|striptags|escape }}
-                {% endif %}
-                <span class="noIE">&nbsp;</span><br />
-                {{ post.created_on|date:"F jS, Y g:ia" }}
+  <!--               {% if is_moderator %} -->
+  <!--                 {% if post.is_deleted %} -->
+  <!--                   <a href="{{ siteroot }}postundel?{{ post.key.id }}" title="Undelete Post" onmouseover="rolloverOn('undo', {{ post.key.id }});" onmouseout="rolloverOff();"><img align="right" id="undo{{ post.key.id }}" src="/img/undo.jpg" width="16" height="16" border="0" /></a> -->
+  <!--                 {% else %} -->
+  <!--                   <a href="{{ siteroot }}postdel?{{ post.key.id }}" title="Delete Post" onmouseover="rolloverOn('delete', {{ post.key.id }});" onmouseout="rolloverOff();"><img align="right" id="delete{{ post.key.id }}" src="/img/delete.jpg" width="16" height="16" border="0" /></a> -->
+  <!--                 {% endif %} -->
+  <!--               {% endif %} -->
+  <!--               {% if post.user_homepage %} -->
+  <!--                 <a href="{{ post.user_homepage }}">{{ post.user_name|striptags|escape }}</a> -->
+  <!--               {% else %} -->
+  <!--                 {{ post.user_name|striptags|escape }} -->
+  <!--               {% endif %} -->
+  <!--               <span class="noIE">&nbsp;</span><br /> -->
+  <!--               {{ post.created_on|date:"F jS, Y g:ia" }} -->
 
-                {% if is_moderator %}
-                  <br />
-                  From ip: {{ post.user_ip_str }}
-                {% endif %}
+  <!--               {% if is_moderator %} -->
+  <!--                 <br /> -->
+  <!--                 From ip: {{ post.user_ip_str }} -->
+  <!--               {% endif %} -->
 
-              </div>
-            </div>
-          </td>
-        </tr>
-      {% endfor %}
-      <tr>
-        <td class="contents">
-          <script language="javascript" type="text/javascript">
-          <!--
-          rolloverInit('link', '../img/link_over.jpg');
-          rolloverInit('email', '../img/email_over.jpg');
-          rolloverInit('web', '../img/web_over.jpg');
-          rolloverInit('delete', '../img/delete_over.jpg');
-          rolloverInit('undo', '../img/undo_over.jpg');
-          // -->
-          </script>
-          <div class="posts">
+  <!--             </div> -->
+  <!--           </div> -->
+  <!--         </td> -->
+  <!--       </tr> -->
+  <!--     {% endfor %} -->
+  <!--     <tr> -->
+  <!--       <td class="contents"> -->
+  <!--         <script language="javascript" type="text/javascript"> -->
+  <!--         <!-- -->
+  <!--         rolloverInit('link', '../img/link_over.jpg'); -->
+  <!--         rolloverInit('email', '../img/email_over.jpg'); -->
+  <!--         rolloverInit('web', '../img/web_over.jpg'); -->
+  <!--         rolloverInit('delete', '../img/delete_over.jpg'); -->
+  <!--         rolloverInit('undo', '../img/undo_over.jpg'); -->
+  <!--         // --> -->
+  <!--         </script> -->
+  <!--         <div class="posts"> -->
 
-            <div class="buttons">
-              {% if is_archived %}
-                <p><i>This topic is archived. No further replies will be accepted.</i></p>
-              {% endif %}
+  <!--           <div class="buttons"> -->
+  <!--             {% if is_archived %} -->
+  <!--               <p><i>This topic is archived. No further replies will be accepted.</i></p> -->
+  <!--             {% endif %} -->
 
-              <a accesskey="t" href="{{ siteroot }}">
-                <img src="/img/topics.gif" alt="Other recent topics" border="0" height="14" width="13">
-                Other recent <u>t</u>opics
-              </a>
+  <!--             <!-- <a accesskey="t" href="{{ siteroot }}"> --> -->
+  <!--             <!--   <img src="/img/topics.gif" alt="Other recent topics" border="0" height="14" width="13"> --> -->
+  <!--             <!--   Other recent <u>t</u>opics --> -->
+  <!--             <!-- </a> --> -->
 
-              {% if not is_archived %}
-              <a accesskey="r" href="{{ siteroot }}post?id={{ topic.key.id }}">
-                <img src="/img/edit.gif" alt="Reply to this topic" border="0" height="14" width="13">
-                <u>R</u>eply to this topic
-              </a>
-              {% endif %}
-            </div>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <!--             {% if not is_archived %} -->
+  <!--             <a accesskey="r" href="{{ siteroot }}post?id={{ topic.key.id }}"> -->
+  <!--               <img src="/img/edit.gif" alt="Reply to this topic" border="0" height="14" width="13"> -->
+  <!--               <u>R</u>eply to this topic -->
+  <!--             </a> -->
+  <!--             {% endif %} -->
+  <!--           </div> -->
+  <!--         </div> -->
+  <!--       </td> -->
+  <!--     </tr> -->
+  <!--   </tbody> -->
+  <!-- </table> -->
 </section>
 
 {% if analytics_code %}

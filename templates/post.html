@@ -1,74 +1,33 @@
-{% extends 'layout.html' %}
+{% extends layout %}
 
 {% block title %}
   {{ forum.title_or_url }}
 {% endblock %}
 
 {% block content %}
-  
-<table>
-<tbody>
-<tr>
-	<td colspan="2" class="header">
-		<div>
-			<h1><a href="{{ siteroot }}" class="green">{{ forum.title_or_url }}</a></h1>
-			<p>{{ forum.tagline }}</p>
-			<a href="{{ siteroot }}rss" title="RSS feed"><img src="/img/rss.gif" alt="RSS feed" align="right" valign="middle" border="0" height="14" width="36"></a><br />
-		</div>
-	</td>
-</tr>
-<tr>
-	<td class="sidebar">{{ forum.sidebar}}
-	</td>
-	<td class="contents">
-	<div class="form">
-		<form action="post" method="post">
-		<input name="num1" value="{{ num1 }}" type="hidden">
-		<input name="num2" value="{{ num2 }}" type="hidden">
 
-		{% if prevTopicId %} 
-			<input name="TopicId" value="{{ prevTopicId }}" type="hidden">
-			<h2>Reply to "{{ prevSubject|escape }}"</h2>
-		{% else %}
-			<h2>New topic</h2>
-		{% endif %}
+<section class='content'>
+  <h1>{{ prevSubject|escape }} - Ответить</h1>
+  <form id='post-form' method='post'>
+    {% if prevTopicId %} 
+      <input name="TopicId" value="{{ prevTopicId }}" type="hidden">
+    {% else %}
+      <h1>New topic</h1>
+    {% endif %}
 
-		<table class="form" cellspacing="0">
-			<tbody>
-			{% if not prevTopicId %} 
-			<tr>
-				<th><label for="Subject">Subject:</label></th>
-				<td colspan="2">
-					<input class="{{ subject_class }}" size="60" maxlength="64" name="Subject" id="Subject" style="width: 39em;" value="{{ prevSubject|escape }}" type="edit">
-					&nbsp;
-				</td>
-			</tr>
-			{% endif %}
+    {% if not prevTopicId %} 
+      <label for="Subject">Subject:</label>
+      <input class="{{ subject_class }}" size="60" maxlength="64" name="Subject" id="Subject" style="width: 39em;" value="{{ prevSubject|escape }}" type="edit">
+    {% endif %}
 
-			<tr>
-				<th><label for="Message">Message:</label></th>
-				<td colspan="2">
-					<textarea class="{{ message_class }}" name="Message" id="Message" style="width: 39em;" rows="16" cols="60" wrap="virtual">{{ prevMessage|escape }}</textarea>
-					<div style="width: 300px;">Don't use HTML. Surround URLs with spaces.</div>
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td>&nbsp;</td>
-				<td class="buttons" colspan="2">
-					<input accesskey="o" name="Ok" value="Ok" type="submit">
-					<input accesskey="c" name="Cancel" value="Cancel" type="submit">
-				</td>
-			</tr>
-			</tbody>
-		</table>
-
-		</form>
-	</div>
-
-	</td>
-</tr>
-</tbody>
-</table>
+    <fieldset>
+      <legend>Введите ваше сообщение и нажмите отправить</legend>
+      <!-- <label for="Message">Message:</label> -->
+      <textarea class="{{ message_class }}" name="Message" id="Message" wrap="virtual">{{ prevMessage|escape }}</textarea>
+    </fieldset>
+      <input name="Ok" value="Ok" type="submit">
+      <input name="Cancel" value="Cancel" type="submit">
+  </form>
+</section>
 
 {% endblock %}

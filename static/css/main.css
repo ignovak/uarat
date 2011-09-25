@@ -159,8 +159,67 @@ table.topic td {
   text-align: left;
 }
 
-.manageforums-link {
-  display: none;
+/* post */
+  .page-links {
+    padding: 0 10px;
+    height: 25px;
+  }
+  .page-link {
+    float: left;
+  }
+  .post-link {
+    float: right;
+    font-weight: bold;
+  }
+  .post {
+    border: 1px solid #9d9d9d;
+    margin-bottom: 4px;
+    color: #333;
+  }
+  .post-author {
+    border-right: 1px solid #9d9d9d;
+    min-height: 200px;
+    width: 200px;
+    float: left;
+  }
+  .post-info {
+    margin-left: 200px;
+    padding: 10px;
+    font-style: italic;
+    font-size: 90%;
+  }
+  .post-date {
+    float: left;
+  }
+  .post-number {
+    float: right;
+  }
+  .post-body {
+    margin-left: 200px;
+    padding: 10px;
+  }
+  .post-links {
+    border-top: 1px dotted #9d9d9d;
+    min-height: 30px;
+    clear: both;
+  }
+/* end post */
+
+#post-form {
+  border: 1px solid #9d9d9d;
+  padding: 10px 15px;
+}
+fieldset {
+  border: 1px solid #9d9d9d;
+  padding: 20px;
+}
+legend {
+  font-weight: bold;
+  color: #333;
+}
+textarea {
+  height: 100px;
+  width: 99%;
 }
 
 .form {
