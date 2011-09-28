@@ -913,7 +913,6 @@ class Login(webapp.RequestHandler):
     self.response.out.write(template.render(path, template_values))
 
   def post(self):
-    self.email = self.request.get('email')
     error = self.__error()
     if error:
       if xhr(self):
@@ -934,12 +933,16 @@ class Login(webapp.RequestHandler):
       self.redirect('/')
 
   def __error(self):
-    if re.match('^[-.\w]+@(?:[a-z\d][-a-z\d]+\.)+[a-z]{2,6}$', self.email) is None:
-      return 'incorrectEmail'
+    email_or_nickname = self.request.get('name')
+    if re.match('^[-.\w]+@(?:[a-z\d][-a-z\d]+\.)+[a-z]{2,6}$', email_or_nickname) is not None:
+      self.user = User.all().filter('email =', email_or_nickname).get()
+    elif re.match('^\w*$', email_or_nickname) is not None:
+      self.user = User.all().filter('nickname =', email_or_nickname).get()
+    else:
+      return 'incorrectEmailOrNickname'
 
-    self.user = User.all().filter('email =', self.email).get()
     if self.user is None:
-      return 'wrongEmail'
+      return 'wrongEmailOrNickname'
 
     salt = self.user.salt
     password = self.request.get('password')

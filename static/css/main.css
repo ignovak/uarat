@@ -167,7 +167,7 @@ table.topic td {
   .page-link {
     float: left;
   }
-  .post-link {
+  .post-link, .topic-link {
     float: right;
     font-weight: bold;
   }
