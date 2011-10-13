@@ -6,9 +6,22 @@ from google.appengine.ext import db
 class User(db.Model):
   nickname = db.StringProperty()
   email = db.EmailProperty()
+  show_email = db.BooleanProperty()
   password = db.StringProperty()
+  remember_me = db.BooleanProperty()
   salt = db.StringProperty()
-  name = db.StringProperty()
+  username = db.StringProperty()
+  location = db.StringProperty(default='')
+  sex = db.StringProperty()
+  birthday = db.DateProperty()
+  interests = db.StringProperty(default='')
+  about = db.TextProperty()
+  icq = db.IntegerProperty()
+  skype = db.StringProperty(default='')
+  avatar = db.BlobProperty()
+  show_avatar = db.BooleanProperty()
+  signature = db.TextProperty()
+
   is_admin = db.BooleanProperty(default=False)
 
 class FofouUser(db.Model):

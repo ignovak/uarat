@@ -8,6 +8,7 @@ from google.appengine.api import memcache
 from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp import template
 from django.utils import feedgenerator
+from django.utils import simplejson as json
 from django.template import Context, Template
 
 from model import User, FofouUser, Forum, Topic, Post
@@ -205,21 +206,23 @@ def get_log_in_out(url):
 
 class FofouBase(webapp.RequestHandler):
   def user(self):
+    self.uid = ''
     self.username = ''
     self.role = ''
     self.is_admin = False
-    sessionId = self.request.cookies.get('sid')
-    if sessionId:
-      userId = memcache.get(sessionId)
-      if userId is not None:
-        user = User.get_by_id(userId)
-        self.username = user.name
-        if user.is_admin:
-          self.is_admin = True
-          self.role = 'user admin'
-        else:
-          self.role = 'user'
-        return user
+    sid = self.request.cookies.get('sid')
+    if sid:
+      self.uid = memcache.get(sid)
+      if self.uid is not None:
+        user = User.get_by_id(self.uid)
+        if user is not None:
+          self.username = user.username
+          if user.is_admin:
+            self.is_admin = True
+            self.role = 'user admin'
+          else:
+            self.role = 'user'
+          return user
 
   _cookie = None
   # returns either a FOFOU_COOKIE sent by the browser or a newly created cookie
@@ -432,6 +435,7 @@ class ForumList(FofouBase):
     tvals = {
       'forums' : forums,
       'role': self.role,
+      'uid': self.uid,
       'username': self.username,
       'groupes': Forum.GROUPES
     }
@@ -832,6 +836,24 @@ class PostForm(FofouBase):
       logging.info('no topic id')
       self.redirect(siteroot)
 
+class Profile(FofouBase):
+  '''
+  responds to /profile/<id>
+  '''
+
+  def get(self, id):
+    self.user()
+    if not self.user:
+      return redirect('/')
+
+    profile = User.get_by_id(int(id))
+    tvals = {
+      'role': self.role,
+      'username': self.username,
+      'profile': profile,
+    }
+    self.template_out('templates/profile.html', tvals)
+
 class Signup(webapp.RequestHandler):
   def get(self):
     template_values = {
@@ -861,8 +883,8 @@ class Signup(webapp.RequestHandler):
         {
           'label': 'Name',
           'type': 'text',
-          'name': 'name',
-          'value': self.request.get('name')
+          'name': 'username',
+          'value': self.request.get('username')
         }
       ],
       'layout': 'ajax.html' if xhr(self) else 'layout.html'
@@ -875,7 +897,7 @@ class Signup(webapp.RequestHandler):
     self.email = self.request.get('email')
     self.password = self.request.get('password')
     self.confirmPassword = self.request.get('confirmPassword')
-    self.name = self.request.get('name')
+    self.username = self.request.get('username')
 
     salt = str(uuid.uuid4()).replace('-','')
     passwordHash = hashlib.sha1(self.password + salt).hexdigest()
@@ -885,17 +907,21 @@ class Signup(webapp.RequestHandler):
       email = self.email,
       password = str(passwordHash),
       salt = salt,
-      name = self.name
+      username = self.username
     ).put()
 
-    sessionId = str(uuid.uuid4()).replace('-','')
-    memcache.set(sessionId, key.id(), 36000)
+    uid = key.id()
+    sid = str(uuid.uuid4()).replace('-','')
+    memcache.set(sid, uid, 36000)
     self.response.headers.add_header('Set-Cookie',
-        'sid=%s; path=/' % sessionId)
+        'sid=%s; path=/' % sid)
 
     if xhr(self):
-      resp = '{"username": "' + self.name + '"}'
-      return self.response.out.write(resp)
+      resp = {
+        'username': self.username,
+        'id': uid
+      }
+      return self.response.out.write(json.dumps(resp))
     else:
       self.redirect('/')
 
@@ -920,15 +946,20 @@ class Login(webapp.RequestHandler):
       else:
         return self.redirect('/login?error=' + error)
 
-    sessionId = str(uuid.uuid4()).replace('-','')
-    memcache.set(sessionId, self.user.key().id(), 36000)
+    sid = str(uuid.uuid4()).replace('-','')
+    uid = self.user.key().id()
+    memcache.set(sid, uid, 36000)
     self.response.headers.add_header('Set-Cookie',
-        'sid=%s; path=/' % sessionId)
+        'sid=%s; path=/' % sid)
 
     if xhr(self):
       role = 'user admin' if self.user.is_admin else 'user'
-      resp = '{"role":"' + role + '", "username": "' + self.user.name + '"}'
-      return self.response.out.write(resp)
+      resp = {
+        'role': role,
+        'username': self.user.username,
+        'uid': uid
+      }
+      return self.response.out.write(json.dumps(resp))
     else:
       self.redirect('/')
 
@@ -955,8 +986,8 @@ class Login(webapp.RequestHandler):
 
 class Logout(webapp.RequestHandler):
   def get(self):
-    sessionId = self.request.cookies.get('sid')
-    memcache.delete(sessionId)
+    sid = self.request.cookies.get('sid')
+    memcache.delete(sid)
     self.response.headers.add_header('Set-Cookie', 'sid=; path=/')
 
     if self.request.headers.get('X-Requested-With') != 'XMLHttpRequest':
@@ -965,10 +996,11 @@ class Logout(webapp.RequestHandler):
 def main():
   application = webapp.WSGIApplication(
     [ ('/', ForumList),
-      ('/manageforums', ManageForums),
-      ('/signup', Signup),
       ('/login', Login),
+      ('/signup', Signup),
       ('/logout', Logout),
+      ('/users/(\d+)', Profile),
+      ('/manageforums', ManageForums),
       ('/[^/]+/postdel', PostDelUndel),
       ('/[^/]+/postundel', PostDelUndel),
       ('/[^/]+/post', PostForm),

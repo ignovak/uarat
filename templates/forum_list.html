@@ -13,7 +13,7 @@
 {% for group in forums %}
   <section class='content'>
     <h1>{{ group.title }}</h1>
-		{% if forums %}
+    {% if forums %}
       <table>
         <thead>
           <tr>
@@ -41,9 +41,9 @@
 					{% endfor %}
         </tbody>
       </table>
-		{% else %}
-			<p>There are no forums created yet.</p>
-		{% endif %}
+    {% else %}
+      <p>There are no forums created yet.</p>
+    {% endif %}
   </section>
 {% endfor %}
   

@@ -15,6 +15,7 @@ $(function() {
           } else {
             $('nav').removeClass('guest').addClass(data.role);
             $('strong', '.greeting').text(data.username);
+            $('.profile-link').attr('href', '/users/' + data.uid + '#essential')
             $('#dialog').dialog('close');
           };
         }, 'json');
