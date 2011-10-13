@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import os, string, Cookie, sha, time, random, cgi, urllib, datetime, StringIO, pickle, uuid, hashlib, re
+import string, Cookie, sha, time, random, cgi, urllib, datetime, StringIO, pickle, uuid, hashlib, re
 
 from google.appengine.api import memcache
 from google.appengine.ext import webapp, db
-from google.appengine.ext.webapp import template
 from django.utils import simplejson as json
 
 from model import User, FofouUser, Forum, Topic, Post
+import view
 
 def xhr(handler):
   return handler.request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -45,11 +45,10 @@ class Signup(webapp.RequestHandler):
           'name': 'username',
           'value': self.request.get('username')
         }
-      ],
-      'layout': 'ajax.html' if xhr(self) else 'layout.html'
+      ]
     }
-    path = os.path.join('templates/signup.html')
-    self.response.out.write(template.render(path, template_values))
+    page = view.Signup(self.request, template_values)
+    page.render(self.response.out)
 
   def post(self):
     self.nickname = self.request.get('nickname')
@@ -78,7 +77,7 @@ class Signup(webapp.RequestHandler):
     if xhr(self):
       resp = {
         'username': self.username,
-        'id': uid
+        'uid': uid
       }
       return self.response.out.write(json.dumps(resp))
     else:
@@ -92,10 +91,9 @@ class Login(webapp.RequestHandler):
     template_values = {
       # 'error': self.ERROR_CODES.get(self.request.get('error'), 'Some error')
       'error': self.request.get('error'),
-      'layout': 'ajax.html' if xhr(self) else 'layout.html'
     }
-    path = os.path.join('templates/login.html')
-    self.response.out.write(template.render(path, template_values))
+    page = view.Login(self.request, template_values)
+    page.render(self.response.out)
 
   def post(self):
     error = self.__error()

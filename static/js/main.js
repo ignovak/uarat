@@ -30,9 +30,9 @@ $(function() {
               if ( data.error ) {
                 $('.error', '#dialog').text(data.error);
               } else {
-                console.log('re');
                 $('nav').removeClass('guest').addClass('user');
                 $('strong', '.greeting').text(data.username);
+                $('.profile-link').attr('href', '/users/' + data.uid + '#essential')
                 $('#dialog').dialog('close');
               };
             }, 'json');
