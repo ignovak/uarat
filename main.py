@@ -855,6 +855,25 @@ class Profile(FofouBase):
     }
     self.template_out('templates/profile.html', tvals)
 
+  def post(self, id):
+    profile = User.get_by_id(int(id))
+
+    profile.show_email = True if self.request.get('show_email') else False
+    profile.remember_me = True if self.request.get('remember_me') else False
+    profile.username = self.request.get('username')
+    profile.location = self.request.get('location')
+    profile.sex = self.request.get('sex')
+    # profile.birthday = self.request.get('birthday')
+    profile.interests = self.request.get('interests')
+    profile.about = self.request.get('about')
+    profile.icq = self.request.get('icq')
+    profile.skype = self.request.get('skype')
+    profile.show_avatar = True if self.request.get('show_avatar') else False
+    profile.signature = self.request.get('signature')
+
+    profile.put()
+    self.get(id)
+
 def main():
   application = webapp.WSGIApplication(
     [ ('/', ForumList),

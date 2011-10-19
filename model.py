@@ -16,7 +16,7 @@ class User(db.Model):
   birthday = db.DateProperty()
   interests = db.StringProperty(default='')
   about = db.TextProperty()
-  icq = db.IntegerProperty()
+  icq = db.StringProperty(default='')
   skype = db.StringProperty(default='')
   avatar = db.BlobProperty()
   show_avatar = db.BooleanProperty()
