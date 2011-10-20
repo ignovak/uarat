@@ -71,12 +71,14 @@
           <input type='text' name='location' value='{{ profile.location }}' id='location' />
         </p>
         <p>
-          <label for='sex'>Пол</label>
-          <input type='text' name='sex' value='' id='sex' />
+          Пол
+          <label><input type='radio' name='sex' value='' /> Не указан</label>
+          <label><input type='radio' name='sex' value='male' /> Мужской</label>
+          <label><input type='radio' name='sex' value='female' /> Женский</label>
         </p>
         <p>
           <label for='birthday'>Дата рождения</label>
-          <input type='text' name='birthday' value='' id='birthday' />
+          <input type='date' name='birthday' value='{{ profile.birthday }}' id='birthday' />
         </p>
         <p>
           <label for='interests'>Интересы</label>
@@ -84,7 +86,7 @@
         </p>
         <p>
           <label for='about'>Обо мне</label>
-          <textarea name='about' id='about' rows='8' cols='40'></textarea>
+          <textarea name='about' id='about' rows='8' cols='40'>{{ profile.about }}</textarea>
         </p>
       </fieldset>
       <fieldset id='messaging'>

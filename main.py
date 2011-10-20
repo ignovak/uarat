@@ -856,6 +856,8 @@ class Profile(FofouBase):
     self.template_out('templates/profile.html', tvals)
 
   def post(self, id):
+    from datetime import datetime
+    logging.info(self.request.get('birthday'))
     profile = User.get_by_id(int(id))
 
     profile.show_email = True if self.request.get('show_email') else False
@@ -863,7 +865,7 @@ class Profile(FofouBase):
     profile.username = self.request.get('username')
     profile.location = self.request.get('location')
     profile.sex = self.request.get('sex')
-    # profile.birthday = self.request.get('birthday')
+    profile.birthday = datetime.strptime(self.request.get('birthday'), '%Y-%m-%d').date()
     profile.interests = self.request.get('interests')
     profile.about = self.request.get('about')
     profile.icq = self.request.get('icq')
