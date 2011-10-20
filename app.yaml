@@ -13,5 +13,5 @@ handlers:
 - url: .*
   script: main.py
 
-builting:
+builtins:
 - remote_api: on
