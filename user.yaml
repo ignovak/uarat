@@ -33,12 +33,8 @@ transformers:
       external_name: email
     - property: show_email
       external_name: show_email
-    - property: password
-      external_name: password
     - property: remember_me
       external_name: remember_me
-    - property: salt
-      external_name: salt
     - property: username
       external_name: username
     - property: location
