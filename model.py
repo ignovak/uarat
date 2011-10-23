@@ -18,10 +18,11 @@ class User(db.Model):
   about = db.TextProperty()
   icq = db.StringProperty(default='')
   skype = db.StringProperty(default='')
-  # mail_agent = db.StringProperty(default='')
+  mail_agent = db.StringProperty(default='')
   avatar = db.StringProperty()
   show_avatar = db.BooleanProperty()
   signature = db.TextProperty()
+  posts_num = db.IntegerProperty()
 
   is_admin = db.BooleanProperty(default=False)
 

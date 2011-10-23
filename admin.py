@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import logging, re
+from datetime import datetime
 
 from google.appengine.api import urlfetch
 from google.appengine.ext import webapp
@@ -11,16 +12,12 @@ from BeautifulSoup import BeautifulSoup
 
 class FetchUsers(webapp.RequestHandler):
 
-  def get(self, id):
+  def get(self):
     url = 'http://uarat.3bb.ru/profile.php?id='
     self.response.headers['Content-Type'] = 'text-plain'
-    # if 1:
-    #   i = 3
-    if id:
-      r = range(int(id), int(id) + 1)
-    else:
-      r = range(21, 31)
-    for i in r:
+    start = int(self.request.get('s') or 0) + 1
+    end = int(self.request.get('e') or 10) + 1
+    for i in range(start, end):
       res = urlfetch.fetch(url + str(i))
       user = self.__get_attributes(res) or {}
       logging.info(i)
@@ -28,6 +25,7 @@ class FetchUsers(webapp.RequestHandler):
       for attr in user:
         # logging.info(attr + ': ' + user[attr])
         self.response.out.write('%s: %s\n' % (attr, user[attr]))
+        # self.response.out.write(u'%s: %s\n' % (attr, user[attr]))
       self.response.out.write('\n\n')
 
   def __get_attributes(self, res):
@@ -50,6 +48,7 @@ class FetchUsers(webapp.RequestHandler):
                   .replace('Skype:', 'skype') \
                   .replace('Mail Agent:', 'mail_agent') \
                   .replace('Обо мне:', 'about') \
+                  .replace('Сообщений:', 'posts_num') \
                   .replace('Интересы:', 'interests')
     
     profile = BeautifulSoup(profile_str)
@@ -69,6 +68,7 @@ class FetchUsers(webapp.RequestHandler):
       'skype',
       'mail_agent',
       'about',
+      'posts_num',
       'interests'
     ]
 
@@ -92,11 +92,12 @@ class FetchUsers(webapp.RequestHandler):
         user[attr] = attributes[attr]
         if attr == 'birthday':
           user[attr] = re.search(r'\((.*)\)', user[attr]).group(1)
+          # user[attr] = datetime.strptime(re.search(r'\((.*)\)', user[attr]).group(1), '%Y-%m-%d').date()
     return user
 
 def main():
   application = webapp.WSGIApplication([
-        ('/admin/fetch-users/(\d*)', FetchUsers)
+        ('/admin/fetch-users', FetchUsers)
         ], debug=True)
   util.run_wsgi_app(application)
 
