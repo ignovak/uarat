@@ -5,10 +5,11 @@ import logging, re
 from datetime import datetime
 
 from google.appengine.api import urlfetch
-from google.appengine.ext import webapp
+from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp import util
 
 from BeautifulSoup import BeautifulSoup
+from model import User
 
 class FetchUsers(webapp.RequestHandler):
 
@@ -17,16 +18,16 @@ class FetchUsers(webapp.RequestHandler):
     self.response.headers['Content-Type'] = 'text-plain'
     start = int(self.request.get('s') or 0) + 1
     end = int(self.request.get('e') or 10) + 1
+
+    users = []
     for i in range(start, end):
       res = urlfetch.fetch(url + str(i))
-      user = self.__get_attributes(res) or {}
-      logging.info(i)
-      logging.info(user)
-      for attr in user:
-        # logging.info(attr + ': ' + user[attr])
-        self.response.out.write('%s: %s\n' % (attr, user[attr]))
-        # self.response.out.write(u'%s: %s\n' % (attr, user[attr]))
-      self.response.out.write('\n\n')
+      user = self.__get_attributes(res)
+      if user:
+        users.append(user)
+
+    db.put(users)
+    self.response.out.write('done')
 
   def __get_attributes(self, res):
     if res.status_code != 200:
@@ -52,6 +53,7 @@ class FetchUsers(webapp.RequestHandler):
                   .replace('Интересы:', 'interests')
     
     profile = BeautifulSoup(profile_str)
+
     # self.response.out.write(profile.extract())
     # return
     fields = [
@@ -78,26 +80,44 @@ class FetchUsers(webapp.RequestHandler):
     avatar = lis.pop(0)
     signature = profile('div', id='profile-signature')
 
-    attributes = dict(map(lambda li: (li.span and li.span.string, li.strong.string), lis))
+    def get_attr(li):
+      if li.span:
+        if li.span.string == 'posts_num':
+          return ('posts_num', re.search('\d+', str(li.strong)).group())
+        return (li.span and li.span.string, li.strong.string)
+      return ('', '')
+
+    attributes = dict(map(get_attr, lis))
+
     attributes['nickname'] = nickname
     attributes['rolename'] = rolename
     attributes['avatar'] = avatar.div and avatar.div.img['src']
-    # TODO: fix signature retrieving
-    # attributes['signature'] = signature and str(signature[0]('p')[0])
-    attributes['signature'] = signature and signature[0]('p')[0].string
+    attributes['signature'] = signature and signature[0]('p')[0]
 
-    user = {}
-    for attr in fields:
-      if attributes.get(attr):
-        user[attr] = attributes[attr]
-        if attr == 'birthday':
-          user[attr] = re.search(r'\((.*)\)', user[attr]).group(1)
-          # user[attr] = datetime.strptime(re.search(r'\((.*)\)', user[attr]).group(1), '%Y-%m-%d').date()
+    user = User()
+    for key in fields:
+      val = attributes.get(key)
+      if val:
+        if key == 'birthday':
+          birthday = re.search(r'\((.*)\)', val).group(1)
+          user.birthday = datetime.strptime(birthday, '%Y-%m-%d').date()
+        elif key == 'registered':
+          user.registered = datetime.strptime(val, '%Y-%m-%d').date()
+        elif key == 'posts_num':
+          user.posts_num = int(val)
+        else:
+          user.__dict__['_' + key] = unicode(val)
     return user
+
+class RemoveUsers(webapp.RequestHandler):
+  def get(self):
+    db.delete(User.all(keys_only=True))
+  
 
 def main():
   application = webapp.WSGIApplication([
-        ('/admin/fetch-users', FetchUsers)
+        ('/admin/fetch-users', FetchUsers),
+        ('/admin/remove-users', RemoveUsers)
         ], debug=True)
   util.run_wsgi_app(application)
 

@@ -14,7 +14,7 @@ class User(db.Model):
 
   location = db.StringProperty(default='')
   sex = db.StringProperty(choices=['male', 'female'])
-  birthday = db.DateProperty(default='')
+  birthday = db.DateProperty()
   interests = db.StringProperty(default='')
   about = db.TextProperty(default='')
   icq = db.StringProperty(default='')
