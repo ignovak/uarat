@@ -10,6 +10,9 @@ handlers:
 - url: /img
   static_dir: img
 
+- url: /admin.*
+  script: admin.py
+
 - url: .*
   script: main.py
 
