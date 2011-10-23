@@ -25,6 +25,7 @@ $(function() {
       $('#signup-btn').click(function() {
         $('#dialog').load('/signup', function() {
           $('#ui-dialog-title-dialog').text('Sign Up')
+          $('#signup-form').find('input').first().focus();
           $('#signup-form').submit(function() {
             $.post('/signup', $(this).serialize(), function(data) {
               if ( data.error ) {

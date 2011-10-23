@@ -865,7 +865,8 @@ class Profile(FofouBase):
     profile.username = self.request.get('username')
     profile.location = self.request.get('location')
     profile.sex = self.request.get('sex')
-    profile.birthday = datetime.strptime(self.request.get('birthday'), '%Y-%m-%d').date()
+    if self.request.get('birthday'):
+      profile.birthday = datetime.strptime(self.request.get('birthday'), '%Y-%m-%d').date()
     profile.interests = self.request.get('interests')
     profile.about = self.request.get('about')
     profile.icq = self.request.get('icq')

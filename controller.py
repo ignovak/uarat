@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import string, Cookie, sha, time, random, cgi, urllib, datetime, StringIO, pickle, uuid, hashlib, re
+import string, Cookie, sha, time, random, cgi, urllib, datetime, StringIO, pickle, uuid, hashlib, re, logging
 
 from google.appengine.api import memcache
 from google.appengine.ext import webapp, db
@@ -59,6 +59,9 @@ class Signup(webapp.RequestHandler):
 
     salt = str(uuid.uuid4()).replace('-','')
     passwordHash = hashlib.sha1(self.password + salt).hexdigest()
+    # regist = .date()
+    # logging.info(type(regist))
+    # logging.info(isinstance(regist, datetime.date))
 
     key = User(
       nickname = self.nickname,
