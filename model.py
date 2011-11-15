@@ -20,12 +20,11 @@ class User(db.Model):
   icq = db.StringProperty(default='')
   skype = db.StringProperty(default='')
   mail_agent = db.StringProperty(default='')
-  avatar = db.BlobProperty()
+  avatar = db.StringProperty()
   show_avatar = db.BooleanProperty()
   signature = db.TextProperty(default='')
 
   registered = db.DateProperty(auto_now_add=True)
-  # registered = db.DateTimeProperty()
   posts_num = db.IntegerProperty()
 
   is_admin = db.BooleanProperty(default=False)

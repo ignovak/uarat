@@ -22,6 +22,14 @@
   {% for post in posts %}
     <div id='{{ post.key.id }}' class='post'>
       <div class='post-author'>
+        <ul>
+          <li class='name'>{{ post.user.nickname }}</li>
+          <li class='role'>{{ post.user.rolename }}</li>
+          <li>{{ post.user.avatar }}</li>
+          <li>Откуда: {{ post.user.location }}</li>
+          <li>Сообщений: {{ post.user.posts_num }}</li>
+          <li>ICQ: {{ post.user.icq }}</li>
+        </ul>
       </div>
       <div class='post-info'>
         <div class='post-date'>{{ post.created_on|date:"F jS, Y g:ia" }}</div>

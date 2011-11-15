@@ -41,6 +41,8 @@ class FetchUsers(webapp.RequestHandler):
     profile_str = profile_str \
                   .replace('Настоящее имя:', 'username') \
                   .replace('Пол:', 'sex') \
+                  .replace('Женский', 'female') \
+                  .replace('Мужской', 'male') \
                   .replace('Возраст:', 'birthday') \
                   .replace('Местонахождение:', 'location') \
                   .replace('Зарегистрирован:', 'registered') \
@@ -112,12 +114,21 @@ class FetchUsers(webapp.RequestHandler):
 class RemoveUsers(webapp.RequestHandler):
   def get(self):
     db.delete(User.all(keys_only=True))
-  
+
+class Help(webapp.RequestHandler):
+  def get(self):
+    self.response.headers['Content-Type'] = 'text/plain'
+    self.response.out.write('''
+    /admin/fetch-users?s=0&e=10
+    /admin/remove-users
+    ''')
+
 
 def main():
   application = webapp.WSGIApplication([
         ('/admin/fetch-users', FetchUsers),
-        ('/admin/remove-users', RemoveUsers)
+        ('/admin/remove-users', RemoveUsers),
+        ('/admin.*', Help)
         ], debug=True)
   util.run_wsgi_app(application)
 

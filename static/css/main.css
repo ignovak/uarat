@@ -181,6 +181,22 @@ table.topic td {
     min-height: 200px;
     width: 200px;
     float: left;
+    color: #000;
+    font-size: 90%;
+  }
+  .post-author ul {
+    margin: 5px;
+    padding: 0;
+  }
+  .post-author ul li {
+    display: block;
+  }
+  .post-author ul li.name {
+    font-size: 110%;
+    font-weight: bold;
+  }
+  .post-author ul li.role {
+    font-weight: bold;
   }
   .post-info {
     margin-left: 200px;
