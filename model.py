@@ -21,6 +21,7 @@ class User(db.Model):
   skype = db.StringProperty(default='')
   mail_agent = db.StringProperty(default='')
   avatar = db.StringProperty()
+  image = db.BlobProperty()
   show_avatar = db.BooleanProperty()
   signature = db.TextProperty(default='')
 

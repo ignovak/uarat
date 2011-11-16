@@ -4,7 +4,7 @@ import logging
 
 import wsgiref.handlers
 # from google.appengine.api import users
-from google.appengine.api import memcache
+from google.appengine.api import memcache, images
 from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp import template
 from django.utils import feedgenerator
@@ -874,6 +874,10 @@ class Profile(FofouBase):
     profile.show_avatar = True if self.request.get('show_avatar') else False
     profile.signature = self.request.get('signature')
 
+    avatar = self.request.get('image')
+    if avatar:
+      profile.image = db.Blob(images.resize(avatar, 90, 90))
+
     profile.put()
     self.get(id)
 
@@ -884,6 +888,7 @@ def main():
       ('/signup', controller.Signup),
       ('/logout', controller.Logout),
       ('/users/(\d+)', Profile),
+      ('/images/(\d+)', controller.Image),
       ('/manageforums', ManageForums),
       ('/[^/]+/postdel', PostDelUndel),
       ('/[^/]+/postundel', PostDelUndel),

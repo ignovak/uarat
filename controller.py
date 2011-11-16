@@ -154,3 +154,12 @@ class Logout(webapp.RequestHandler):
     if self.request.headers.get('X-Requested-With') != 'XMLHttpRequest':
       self.redirect('/')
 
+class Image(webapp.RequestHandler):
+  def get(self, id):
+    user = User.get_by_id(int(id))
+    if user.image:
+      self.response.headers['Content-Type'] = 'image/png'
+      self.response.out.write(user.image)
+    else:
+      self.error(404)
+

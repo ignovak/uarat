@@ -25,7 +25,7 @@
         <ul>
           <li class='name'>{{ post.user.nickname }}</li>
           <li class='role'>{{ post.user.rolename }}</li>
-          <li>{{ post.user.avatar }}</li>
+          <li><img src='/images/{{ post.user.key.id }}' /></li>
           <li>Откуда: {{ post.user.location }}</li>
           <li>Сообщений: {{ post.user.posts_num }}</li>
           <li>ICQ: {{ post.user.icq }}</li>
