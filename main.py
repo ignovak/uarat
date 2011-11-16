@@ -876,7 +876,7 @@ class Profile(FofouBase):
 
     avatar = self.request.get('image')
     if avatar:
-      profile.image = db.Blob(images.resize(avatar, 90, 90))
+      profile.avatar = db.Blob(images.resize(avatar, 90, 90))
 
     profile.put()
     self.get(id)

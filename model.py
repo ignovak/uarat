@@ -20,8 +20,7 @@ class User(db.Model):
   icq = db.StringProperty(default='')
   skype = db.StringProperty(default='')
   mail_agent = db.StringProperty(default='')
-  avatar = db.StringProperty()
-  image = db.BlobProperty()
+  avatar = db.BlobProperty()
   show_avatar = db.BooleanProperty()
   signature = db.TextProperty(default='')
 

@@ -53,7 +53,7 @@ class FetchUsers(webapp.RequestHandler):
                   .replace('Обо мне:', 'about') \
                   .replace('Сообщений:', 'posts_num') \
                   .replace('Интересы:', 'interests')
-    
+
     profile = BeautifulSoup(profile_str)
 
     # self.response.out.write(profile.extract())
@@ -107,6 +107,11 @@ class FetchUsers(webapp.RequestHandler):
           user.registered = datetime.strptime(val, '%Y-%m-%d').date()
         elif key == 'posts_num':
           user.posts_num = int(val)
+        elif key == 'avatar':
+          if val:
+            avatar = urlfetch.fetch('http://uarat.3bb.ru/' + val).content
+            if avatar:
+              user.avatar = db.Blob(avatar)
         else:
           user.__dict__['_' + key] = unicode(val)
     return user

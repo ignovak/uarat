@@ -157,9 +157,9 @@ class Logout(webapp.RequestHandler):
 class Image(webapp.RequestHandler):
   def get(self, id):
     user = User.get_by_id(int(id))
-    if user.image:
+    if user.avatar:
       self.response.headers['Content-Type'] = 'image/png'
-      self.response.out.write(user.image)
+      self.response.out.write(user.avatar)
     else:
       self.error(404)
 
